@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Manage Vehicles</title>
+
+</head>
+
+<body>
+
+<h1>Manage Vehicles</h1>
+
+<a href="/admin/vehicles/add">
+    Add New Vehicle
+</a>
+
+<br><br>
+
+
+<table border="1">
+
+    <thead>
+
+    <tr>
+
+        <th>ID</th>
+
+        <th>Type</th>
+
+        <th>Company</th>
+
+        <th>Model</th>
+
+        <th>Vehicle Number</th>
+
+        <th>Price Per Day</th>
+
+        <th>Fuel</th>
+
+        <th>Available</th>
+
+        <th>Action</th>
+
+    </tr>
+
+    </thead>
+
+
+    <tbody>
+
+    <tr th:each="vehicle : ${vehicles}">
+
+        <td th:text="${vehicle.id}"></td>
+
+        <td th:text="${vehicle.type}"></td>
+
+        <td th:text="${vehicle.company}"></td>
+
+        <td th:text="${vehicle.model}"></td>
+
+        <td th:text="${vehicle.vehicleNumber}"></td>
+
+        <td th:text="${vehicle.pricePerDay}"></td>
+
+        <td th:text="${vehicle.fuelType}"></td>
+
+        <td th:text="${vehicle.available}"></td>
+
+        <td>
+
+    <a th:href="@{/admin/vehicles/edit/{id}(id=${vehicle.id})}">
+        Edit
+    </a>
+
+    |
+
+    <a th:href="@{/admin/vehicles/delete/{id}(id=${vehicle.id})}"
+       onclick="return confirm('Are you sure you want to delete this vehicle?')">
+
+        Delete
+
+    </a>
+
+</td>
+
+    </tr>
+
+    </tbody>
+
+</table>
+
+<br>
+
+<a href="/admin">
+    Back to Admin Dashboard
+</a>
+
+
+</body>
+
+</html>
