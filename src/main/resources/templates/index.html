@@ -1,20 +1,199 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>Car & Bike Rental</title>
+    <title>Car &amp; Bike Rental</title>
+    <link rel="stylesheet" th:href="@{/css/index.css}">
 </head>
-
 <body>
 
-    <h1>Welcome to Car & Bike Rental</h1>
+    <!-- NAVBAR -->
+    <nav class="nav">
+        <a href="/" class="nav-brand">CARBIKE RENTAL</a>
+        <div class="nav-links">
+            <a href="/login" class="btn-nav-login">Login</a>
+            <a href="/register" class="btn-nav-register">Register</a>
+        </div>
+    </nav>
 
-    <p>Rent your favorite car or bike easily.</p>
+    <!-- HERO -->
+    <div class="hero">
+        <div class="hero-content">
+            <span class="hero-badge">&#127775; Limited Time Offer - 20% OFF on First Ride</span>
+            <h1>Ride Your Dream,<br>Rent with Ease</h1>
+            <p>Book premium cars and bikes at unbeatable prices. Flexible plans, zero hidden charges, and a fleet of 50+ vehicles waiting for you.</p>
+            <div class="hero-buttons">
+                <a href="/register" class="btn btn-primary">Get Started Free</a>
+                <a href="#vehicles" class="btn btn-outline">Browse Vehicles</a>
+            </div>
+            <div class="hero-stats">
+                <div class="stat">
+                    <div class="stat-num">50+</div>
+                    <div class="stat-label">Vehicles</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-num">500+</div>
+                    <div class="stat-label">Happy Riders</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-num">4.8&#9733;</div>
+                    <div class="stat-label">Rating</div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-    <a href="/vehicles">View Vehicles</a>
+    <!-- OFFERS BANNER -->
+    <div class="offers-banner">
+        <div class="offers-grid">
+            <div class="offer-card">
+                <div class="offer-icon">&#128663;</div>
+                <div class="offer-text">
+                    <h3>Weekend Special</h3>
+                    <p>Rent any car this Saturday &amp; Sunday at flat 30% off.</p>
+                    <span class="offer-tag">VALID TILL SUNDAY</span>
+                </div>
+            </div>
+            <div class="offer-card">
+                <div class="offer-icon">&#128176;</div>
+                <div class="offer-text">
+                    <h3>First Ride Free</h3>
+                    <p>New users get their first bike ride free up to 10 km.</p>
+                    <span class="offer-tag">NEW USERS</span>
+                </div>
+            </div>
+            <div class="offer-card">
+                <div class="offer-icon">&#127873;</div>
+                <div class="offer-text">
+                    <h3>Refer &amp; Earn</h3>
+                    <p>Refer a friend and both get &#8377;200 rental credit.</p>
+                    <span class="offer-tag">EARN &#8377;200</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- VEHICLES -->
+    <section class="vehicles-section" id="vehicles">
+        <div class="section-header">
+            <div class="badge">Our Fleet</div>
+            <h2>Available Vehicles</h2>
+            <p>Browse our collection of cars and bikes. Click "Proceed to Booking" to reserve yours.</p>
+        </div>
+
+        <div class="empty-vehicles" th:if="${#lists.isEmpty(vehicles)}">
+            <p>No vehicles available yet. Check back soon!</p>
+        </div>
+
+        <div class="vehicles-grid" th:unless="${#lists.isEmpty(vehicles)}">
+            <div class="vehicle-card" th:each="v : ${vehicles}">
+                <div class="vehicle-img" th:if="${v.imageUrl == null or v.imageUrl.isEmpty()}">
+                    <span th:utext="${v.type == 'CAR'} ? '&#128663;' : '&#128690;'"></span>
+                </div>
+                <div class="vehicle-img" th:unless="${v.imageUrl == null or v.imageUrl.isEmpty()}" style="padding:0;">
+                    <img th:src="${v.imageUrl}" alt="Vehicle" style="width:100%;height:190px;object-fit:cover;">
+                </div>
+                <div class="vehicle-body">
+                    <span class="vehicle-type" th:classappend="${v.type == 'CAR'} ? 'type-car' : 'type-bike'"
+                          th:text="${v.type}"></span>
+                    <h3 th:text="${v.model}"></h3>
+                    <div class="vehicle-company" th:text="${v.company}"></div>
+                    <div class="vehicle-details">
+                        <span class="vehicle-detail">&#9981; <span th:text="${v.fuelType}"></span></span>
+                        <span class="vehicle-detail">&#128101; <span th:text="${v.seatingCapacity}"></span> Seats</span>
+                        <span class="vehicle-detail" th:if="${v.vehicleNumber}">&#128203; <span th:text="${v.vehicleNumber}"></span></span>
+                    </div>
+                    <div class="vehicle-price" th:if="${v.pricePerKm != null}">
+                        <span class="price" th:text="'&#8377;' + ${#numbers.formatDecimal(v.pricePerKm, 1, 0)}"></span>
+                        <span class="per">/ km</span>
+                    </div>
+                    <div class="vehicle-price" th:unless="${v.pricePerKm != null}">
+                        <span class="price">Price on request</span>
+                    </div>
+                    <div class="vehicle-actions">
+                        <a th:href="@{/booking/{id}(id=${v.id})}" class="btn-billing" sec:authorize="isAuthenticated()">Proceed to Booking</a>
+                        <a th:href="@{/login}" class="btn-billing" sec:authorize="!isAuthenticated()">Login to Book</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FEATURES -->
+    <section class="features-section">
+        <div class="section-header">
+            <div class="badge">Why Us</div>
+            <h2>Why Choose CarBike Rental?</h2>
+            <p>We make renting vehicles simple, affordable, and reliable.</p>
+        </div>
+        <div class="features-grid">
+            <div class="feature-card">
+                <span class="feature-icon">&#128663;</span>
+                <h3>Premium Fleet</h3>
+                <p>Well-maintained cars and bikes from top brands, ready for you.</p>
+            </div>
+            <div class="feature-card">
+                <span class="feature-icon">&#128176;</span>
+                <h3>Transparent Pricing</h3>
+                <p>No hidden fees. What you see is what you pay, every time.</p>
+            </div>
+            <div class="feature-card">
+                <span class="feature-icon">&#9889;</span>
+                <h3>Instant Booking</h3>
+                <p>Book in seconds. No paperwork, no waiting, no hassle.</p>
+            </div>
+            <div class="feature-card">
+                <span class="feature-icon">&#128737;</span>
+                <h3>24/7 Support</h3>
+                <p>Round-the-clock customer support for a smooth experience.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- DEALS -->
+    <section class="deals-section">
+        <div class="section-header">
+            <div class="badge">&#128293; Hot Deals</div>
+            <h2>Special Rental Packages</h2>
+            <p>Grab our limited-time deals and save more on your next ride.</p>
+        </div>
+        <div class="deals-grid">
+            <div class="deal-card">
+                <span class="deal-tag">SAVE 25%</span>
+                <h3>Weekday Saver</h3>
+                <p>Mon - Fri car rental package. Perfect for daily commuters and office goers.</p>
+                <div class="deal-price">&#8377;899 <span>/ day</span></div>
+            </div>
+            <div class="deal-card">
+                <span class="deal-tag">POPULAR</span>
+                <h3>Bike Explorer</h3>
+                <p>Weekend bike rental for adventure seekers. Includes helmet and basic insurance.</p>
+                <div class="deal-price">&#8377;299 <span>/ day</span></div>
+            </div>
+            <div class="deal-card">
+                <span class="deal-tag">BEST VALUE</span>
+                <h3>Monthly Pass</h3>
+                <p>30-day unlimited car access. Best for long-term needs and families.</p>
+                <div class="deal-price">&#8377;14,999 <span>/ month</span></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="cta-section">
+        <h2>Ready to Ride?</h2>
+        <p>Join hundreds of happy riders. Register now and get 20% off on your first booking.</p>
+        <div class="hero-buttons" style="justify-content:center;">
+            <a href="/register" class="btn btn-primary">Register Now</a>
+            <a href="/login" class="btn btn-outline">Login to Book</a>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <div class="footer">
+        &copy; 2026 Car &amp; Bike Rental. All rights reserved.
+    </div>
 
 </body>
-
 </html>

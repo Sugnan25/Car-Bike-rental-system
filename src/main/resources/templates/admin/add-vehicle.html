@@ -1,149 +1,132 @@
 <!DOCTYPE html>
-<html lang="en">
-
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
-
     <meta charset="UTF-8">
-
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0">
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Add Vehicle</title>
-
+    <link rel="stylesheet" th:href="@{/css/admin-add-vehicle.css}">
 </head>
-
 <body>
 
-<h1>Add New Vehicle</h1>
+    <nav class="navbar">
+        <a href="/admin" class="navbar-brand">CARBIKE <span>Admin</span></a>
+        <div class="nav-right">
+            <a href="/admin/vehicles" class="nav-link btn-back">Back to Vehicles</a>
+        </div>
+    </nav>
 
-<form action="/admin/vehicles/save"
-      method="post"
-      th:object="${vehicle}">
+    <div class="container">
+        <div class="page-header">
+            <h1>Add New Vehicle</h1>
+            <p>Fill in the details below to add a vehicle to the fleet.</p>
+        </div>
 
-    <label>Vehicle Type:</label>
+        <div class="form-card">
+            <form action="/admin/vehicles/save" method="post" enctype="multipart/form-data" th:object="${vehicle}">
 
-    <select th:field="*{type}" required>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Vehicle Type</label>
+                        <select th:field="*{type}" required>
+                            <option value="">Select Type</option>
+                            <option value="CAR">Car</option>
+                            <option value="BIKE">Bike</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Fuel Type</label>
+                        <select th:field="*{fuelType}">
+                            <option value="PETROL">Petrol</option>
+                            <option value="DIESEL">Diesel</option>
+                            <option value="ELECTRIC">Electric</option>
+                            <option value="HYBRID">Hybrid</option>
+                        </select>
+                    </div>
+                </div>
 
-        <option value="">Select Type</option>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Company</label>
+                        <input type="text" th:field="*{company}" placeholder="e.g. Toyota" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Model</label>
+                        <input type="text" th:field="*{model}" placeholder="e.g. Fortuner" required>
+                    </div>
+                </div>
 
-        <option value="CAR">Car</option>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Vehicle Number</label>
+                        <input type="text" th:field="*{vehicleNumber}" placeholder="e.g. KA01AB1234" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Seating Capacity</label>
+                        <input type="number" th:field="*{seatingCapacity}" placeholder="e.g. 5" required>
+                    </div>
+                </div>
 
-        <option value="BIKE">Bike</option>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Price Per KM (&#8377;)</label>
+                        <input type="number" step="0.01" th:field="*{pricePerKm}" placeholder="e.g. 12" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Available</label>
+                        <select th:field="*{available}">
+                            <option value="true">Yes</option>
+                            <option value="false">No</option>
+                        </select>
+                    </div>
+                </div>
 
-    </select>
+                <div class="form-group form-full">
+                    <label>Vehicle Photo</label>
+                    <input type="text" th:field="*{imageUrl}" hidden>
+                    <div class="file-upload">
+                        <input type="file" name="imageFile" accept="image/*" onchange="previewImage(this)">
+                        <span class="file-upload-icon">&#128247;</span>
+                        <span class="file-upload-text">Drag &amp; drop photo here or <strong>browse</strong></span>
+                    </div>
+                    <div class="file-preview" id="filePreview">
+                        <img id="previewImg" alt="Preview">
+                        <div class="file-name" id="fileName"></div>
+                    </div>
+                </div>
 
-    <br><br>
+                <div class="form-group form-full">
+                    <label>Description</label>
+                    <textarea th:field="*{description}" placeholder="Enter vehicle description..."></textarea>
+                </div>
 
+                <div class="form-actions">
+                    <button type="submit" class="btn-submit">Save Vehicle</button>
+                    <a href="/admin/vehicles" class="btn-cancel">Cancel</a>
+                </div>
 
-    <label>Company:</label>
+            </form>
+        </div>
+    </div>
 
-    <input type="text"
-           th:field="*{company}"
-           placeholder="Example: Toyota"
-           required>
+    <div class="footer">&copy; 2026 Car &amp; Bike Rental Admin Panel</div>
 
-    <br><br>
-
-
-    <label>Model:</label>
-
-    <input type="text"
-           th:field="*{model}"
-           placeholder="Example: Fortuner"
-           required>
-
-    <br><br>
-
-
-    <label>Vehicle Number:</label>
-
-    <input type="text"
-           th:field="*{vehicleNumber}"
-           placeholder="Example: KA01AB1234"
-           required>
-
-    <br><br>
-
-
-    <label>Description:</label>
-
-    <textarea th:field="*{description}"
-              placeholder="Enter vehicle description">
-    </textarea>
-
-    <br><br>
-
-
-    <label>Price Per Day:</label>
-
-    <input type="number"
-           step="0.01"
-           th:field="*{pricePerDay}"
-           required>
-
-    <br><br>
-
-
-    <label>Fuel Type:</label>
-
-    <select th:field="*{fuelType}">
-
-        <option value="PETROL">Petrol</option>
-
-        <option value="DIESEL">Diesel</option>
-
-        <option value="ELECTRIC">Electric</option>
-
-        <option value="HYBRID">Hybrid</option>
-
-    </select>
-
-    <br><br>
-
-
-    <label>Seating Capacity:</label>
-
-    <input type="number"
-           th:field="*{seatingCapacity}"
-           required>
-
-    <br><br>
-
-
-    <label>Image URL:</label>
-
-    <input type="text"
-           th:field="*{imageUrl}"
-           placeholder="Enter image URL">
-
-    <br><br>
-
-
-    <label>Available:</label>
-
-    <select th:field="*{available}">
-
-        <option value="true">Yes</option>
-
-        <option value="false">No</option>
-
-    </select>
-
-    <br><br>
-
-
-    <button type="submit">
-        Save Vehicle
-    </button>
-
-</form>
-
-<br>
-
-<a href="/admin/vehicles">
-    Back to Vehicles
-</a>
+    <script>
+        function previewImage(input) {
+            var file = input.files[0];
+            if (file) {
+                var reader = new FileReader();
+                var preview = document.getElementById('filePreview');
+                var img = document.getElementById('previewImg');
+                var name = document.getElementById('fileName');
+                reader.onload = function(e) {
+                    img.src = e.target.result;
+                    preview.style.display = 'block';
+                    name.textContent = file.name;
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+    </script>
 
 </body>
-
 </html>

@@ -1,0 +1,110 @@
+* { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; background: #0f0f0f; color: #fff; min-height: 100vh; }
+
+        .navbar {
+            background: #1a1a2e; padding: 0 50px; height: 65px;
+            display: flex; justify-content: space-between; align-items: center;
+            border-bottom: 1px solid #2a2a4a;
+        }
+        .navbar-brand { font-size: 20px; font-weight: 700; color: #00d2ff; text-decoration: none; }
+        .navbar-brand span { color: #fff; font-weight: 400; margin-left: 8px; }
+        .nav-right { display: flex; gap: 12px; align-items: center; }
+        .nav-link { color: #aaa; text-decoration: none; padding: 8px 16px; border-radius: 6px; font-size: 14px; transition: all 0.3s; }
+        .nav-link:hover { color: #fff; background: rgba(255,255,255,0.08); }
+        .btn-back { background: rgba(0,210,255,0.1); border: 1px solid rgba(0,210,255,0.3); color: #00d2ff; }
+        .btn-back:hover { background: rgba(0,210,255,0.2); }
+
+        .container { max-width: 800px; margin: 0 auto; padding: 50px 30px; }
+        .page-header { margin-bottom: 35px; }
+        .page-header h1 { font-size: 28px; font-weight: 700; margin-bottom: 6px; }
+        .page-header p { color: #888; font-size: 14px; }
+
+        .form-card {
+            background: #1a1a2e;
+            border: 1px solid #2a2a4a;
+            border-radius: 14px;
+            padding: 35px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px;
+        }
+        .form-full { grid-column: 1 / -1; }
+
+        .form-group { margin-bottom: 20px; }
+        .form-group label {
+            display: block; font-size: 13px; color: #aaa;
+            margin-bottom: 7px; font-weight: 500;
+        }
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%; padding: 13px 15px;
+            background: #0f0f1a; border: 1px solid #2a2a4a;
+            border-radius: 8px; color: #fff; font-size: 14px;
+            outline: none; transition: border 0.3s;
+            font-family: inherit;
+        }
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus { border-color: #00d2ff; }
+        .form-group input::placeholder,
+        .form-group textarea::placeholder { color: #555; }
+        .form-group select option { background: #1a1a2e; color: #fff; }
+        .form-group textarea { resize: vertical; min-height: 80px; }
+
+        .file-upload {
+            border: 2px dashed #2a2a4a;
+            border-radius: 10px;
+            padding: 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+        }
+        .file-upload:hover { border-color: #00d2ff; }
+        .file-upload input[type="file"] {
+            position: absolute;
+            inset: 0;
+            opacity: 0;
+            cursor: pointer;
+            width: 100%;
+            height: 100%;
+        }
+        .file-upload-icon { font-size: 40px; display: block; margin-bottom: 10px; }
+        .file-upload-text { font-size: 14px; color: #888; }
+        .file-upload-text strong { color: #00d2ff; }
+        .file-preview {
+            display: none; margin-top: 15px;
+        }
+        .file-preview img {
+            max-width: 150px; max-height: 100px;
+            border-radius: 8px; border: 1px solid #2a2a4a;
+        }
+        .file-name { font-size: 12px; color: #888; margin-top: 6px; }
+
+        .form-actions { display: flex; gap: 12px; margin-top: 25px; }
+        .btn-submit {
+            padding: 13px 30px; background: linear-gradient(135deg, #00d2ff, #0090b3);
+            border: none; border-radius: 8px; color: #000; font-size: 15px;
+            font-weight: 700; cursor: pointer; transition: all 0.3s;
+        }
+        .btn-submit:hover { box-shadow: 0 4px 20px rgba(0,210,255,0.3); transform: translateY(-1px); }
+        .btn-cancel {
+            padding: 13px 30px; background: transparent;
+            border: 1px solid #2a2a4a; border-radius: 8px;
+            color: #aaa; font-size: 15px; font-weight: 500;
+            text-decoration: none; transition: all 0.3s; cursor: pointer;
+        }
+        .btn-cancel:hover { border-color: #fff; color: #fff; }
+
+        .footer { text-align: center; padding: 30px; color: #444; font-size: 13px; border-top: 1px solid #1a1a2e; margin-top: 60px; }
+
+        @media (max-width: 768px) {
+            .navbar { padding: 0 20px; }
+            .container { padding: 30px 15px; }
+            .form-row { grid-template-columns: 1fr; }
+            .form-card { padding: 25px 20px; }
+        }

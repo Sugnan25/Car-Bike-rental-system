@@ -1,0 +1,101 @@
+* { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; background: #0f0f0f; color: #fff; min-height: 100vh; }
+
+        .navbar {
+            background: #1a1a2e;
+            padding: 0 50px;
+            height: 65px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #2a2a4a;
+        }
+        .navbar-brand {
+            font-size: 20px;
+            font-weight: 700;
+            color: #00d2ff;
+            text-decoration: none;
+            letter-spacing: 0.5px;
+        }
+        .navbar-brand span { color: #fff; font-weight: 400; margin-left: 8px; }
+        .nav-right { display: flex; gap: 12px; align-items: center; }
+        .nav-link {
+            color: #aaa;
+            text-decoration: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        .nav-link:hover { color: #fff; background: rgba(255,255,255,0.08); }
+        .btn-home {
+            background: rgba(0,210,255,0.1);
+            border: 1px solid rgba(0,210,255,0.3);
+            color: #00d2ff;
+        }
+        .btn-home:hover { background: rgba(0,210,255,0.2); }
+
+        .container { max-width: 1200px; margin: 0 auto; padding: 50px 30px; }
+
+        .welcome { margin-bottom: 45px; }
+        .welcome h2 { font-size: 32px; font-weight: 700; margin-bottom: 8px; }
+        .welcome p { color: #888; font-size: 16px; }
+
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 25px;
+        }
+        .card {
+            background: #1a1a2e;
+            border: 1px solid #2a2a4a;
+            border-radius: 14px;
+            padding: 35px 28px;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+        .card:hover { border-color: #00d2ff; transform: translateY(-3px); }
+        .card-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            margin-bottom: 20px;
+        }
+        .icon-blue { background: rgba(0,210,255,0.1); }
+        .icon-green { background: rgba(16,185,129,0.1); }
+        .icon-purple { background: rgba(139,92,246,0.1); }
+        .icon-orange { background: rgba(251,146,60,0.1); }
+
+        .card h3 { font-size: 18px; margin-bottom: 8px; color: #fff; }
+        .card p { font-size: 14px; color: #888; line-height: 1.5; margin-bottom: 20px; }
+        .card-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            color: #00d2ff;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 600;
+            transition: gap 0.3s;
+        }
+        .card-link:hover { gap: 10px; }
+
+        .footer {
+            text-align: center;
+            padding: 30px;
+            color: #444;
+            font-size: 13px;
+            border-top: 1px solid #1a1a2e;
+            margin-top: 60px;
+        }
+
+        @media (max-width: 768px) {
+            .navbar { padding: 0 20px; }
+            .container { padding: 30px 15px; }
+            .welcome h2 { font-size: 24px; }
+        }

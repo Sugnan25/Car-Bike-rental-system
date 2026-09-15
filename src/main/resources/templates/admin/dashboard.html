@@ -1,179 +1,60 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-
     <meta charset="UTF-8">
-
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0">
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard</title>
-
-    <style>
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f6f9;
-        }
-
-        .navbar {
-            background-color: #222;
-            color: white;
-            padding: 20px 40px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .navbar h1 {
-            font-size: 24px;
-        }
-
-        .logout {
-            background-color: #e74c3c;
-            color: white;
-            padding: 10px 18px;
-            border-radius: 5px;
-            text-decoration: none;
-        }
-
-        .container {
-            padding: 40px;
-        }
-
-        .welcome {
-            margin-bottom: 30px;
-        }
-
-        .welcome h2 {
-            margin-bottom: 10px;
-        }
-
-        .cards {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 25px;
-        }
-
-        .card {
-            background-color: white;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
-            text-align: center;
-        }
-
-        .card h3 {
-            margin-bottom: 15px;
-        }
-
-        .card a {
-            display: inline-block;
-            background-color: #3498db;
-            color: white;
-            padding: 10px 20px;
-            text-decoration: none;
-            border-radius: 5px;
-        }
-
-    </style>
-
+    <link rel="stylesheet" th:href="@{/css/admin-dashboard.css}">
 </head>
-
 <body>
 
     <nav class="navbar">
-
-        <h1>Car & Bike Rental - Admin</h1>
-
-        <a href="/" class="logout">Back to Website</a>
-
+        <a href="/admin" class="navbar-brand">CARBIKE <span>Admin</span></a>
+        <div class="nav-right">
+            <a href="/" class="nav-link btn-home">Back to Website</a>
+        </div>
     </nav>
 
-
     <div class="container">
-
         <div class="welcome">
-
             <h2>Welcome, Admin</h2>
-
             <p>Manage your car and bike rental system from here.</p>
-
         </div>
-
 
         <div class="cards">
-
             <div class="card">
-
+                <div class="card-icon icon-blue">&#128663;</div>
                 <h3>Manage Vehicles</h3>
-
-                <p>Add, edit and delete cars and bikes.</p>
-
-                <br>
-
-                <a href="/admin/vehicles">
-                    Manage Vehicles
-                </a>
-
+                <p>Add, edit and delete cars and bikes from the fleet.</p>
+                <a href="/admin/vehicles" class="card-link">Manage Vehicles &#8594;</a>
             </div>
 
-
             <div class="card">
-
+                <div class="card-icon icon-green">&#10133;</div>
                 <h3>Add Vehicle</h3>
-
                 <p>Add a new car or bike to the rental system.</p>
-
-                <br>
-
-                <a href="/admin/vehicles/add">
-                    Add Vehicle
-                </a>
-
+                <a href="/admin/vehicles/add" class="card-link">Add Vehicle &#8594;</a>
             </div>
 
+            <div class="card">
+                <div class="card-icon icon-purple">&#128100;</div>
+                <h3>Users</h3>
+                <p>View all registered users and their details.</p>
+                <a href="/admin/users" class="card-link">View Users &#8594;</a>
+            </div>
 
             <div class="card">
-
+                <div class="card-icon icon-orange">&#128197;</div>
                 <h3>Bookings</h3>
-
                 <p>View and manage customer bookings.</p>
-
-                <br>
-
-                <a href="/admin/bookings">
-                    Manage Bookings
-                </a>
-
+                <a href="/admin/bookings" class="card-link">Manage Bookings &#8594;</a>
             </div>
-
-
-            <div class="card">
-
-                <h3>Customers</h3>
-
-                <p>View registered customers.</p>
-
-                <br>
-
-                <a href="/admin/customers">
-                    View Customers
-                </a>
-
-            </div>
-
         </div>
+    </div>
 
+    <div class="footer">
+        &copy; 2026 Car &amp; Bike Rental Admin Panel
     </div>
 
 </body>
-
 </html>

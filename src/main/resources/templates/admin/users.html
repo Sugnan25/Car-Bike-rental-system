@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Users</title>
+    <link rel="stylesheet" th:href="@{/css/admin-users.css}">
+</head>
+<body>
+
+    <nav class="navbar">
+        <a href="/admin" class="navbar-brand">CARBIKE <span>Admin</span></a>
+        <div class="nav-right">
+            <a href="/admin" class="nav-link btn-back">Dashboard</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="header">
+            <h1>Registered Users</h1>
+        </div>
+
+        <div class="table-wrap" th:if="${#lists.isEmpty(users)}">
+            <div class="empty-state">
+                <p>No users registered yet.</p>
+            </div>
+        </div>
+
+        <div class="table-wrap" th:unless="${#lists.isEmpty(users)}">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Full Name</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        <th>Role</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="user : ${users}">
+                        <td th:text="${user.id}"></td>
+                        <td><strong th:text="${user.fullName}"></strong></td>
+                        <td th:text="${user.email}"></td>
+                        <td th:text="${user.phone}"></td>
+                        <td>
+                            <span class="badge"
+                                  th:classappend="${user.role == 'ROLE_ADMIN'} ? 'badge-admin' : 'badge-user'"
+                                  th:text="${user.role == 'ROLE_ADMIN'} ? 'ADMIN' : 'USER'"></span>
+                        </td>
+                        <td>
+                            <span class="badge"
+                                  th:classappend="${user.enabled} ? 'badge-enabled' : 'badge-disabled'"
+                                  th:text="${user.enabled} ? 'Active' : 'Disabled'"></span>
+                        </td>
+                        <td>
+                            <a th:href="@{/admin/users/delete/{id}(id=${user.id})}" class="btn-delete"
+                               onclick="return confirm('Are you sure you want to delete this user?')">Delete</a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="footer">&copy; 2026 Car &amp; Bike Rental Admin Panel</div>
+
+</body>
+</html>

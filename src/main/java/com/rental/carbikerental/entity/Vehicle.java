@@ -1,14 +1,15 @@
 package com.rental.carbikerental.entity;
 
-import jakarta.persistence.*;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
+import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
 
-@Entity
-@Table(name = "vehicles")
+@Document(collection = "vehicles")
 public class Vehicle {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private String id;
 
     private String type;
 
@@ -16,13 +17,14 @@ public class Vehicle {
 
     private String model;
 
-    @Column(name = "vehicle_number", unique = true)
+    @Field("vehicle_number")
+    @Indexed(unique = true)
     private String vehicleNumber;
 
-    @Column(length = 1000)
     private String description;
 
-    private Double pricePerDay;
+    @Field("price_per_km")
+    private Double pricePerKm;
 
     private String fuelType;
 
@@ -35,11 +37,11 @@ public class Vehicle {
     public Vehicle() {
     }
 
-    public Long getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(String id) {
         this.id = id;
     }
 
@@ -83,12 +85,12 @@ public class Vehicle {
         this.description = description;
     }
 
-    public Double getPricePerDay() {
-        return pricePerDay;
+    public Double getPricePerKm() {
+        return pricePerKm;
     }
 
-    public void setPricePerDay(Double pricePerDay) {
-        this.pricePerDay = pricePerDay;
+    public void setPricePerKm(Double pricePerKm) {
+        this.pricePerKm = pricePerKm;
     }
 
     public String getFuelType() {

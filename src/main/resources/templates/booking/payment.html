@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Booking &amp; Payment</title>
+    <link rel="stylesheet" th:href="@{/css/payment.css}">
+</head>
+<body>
+
+    <nav class="navbar">
+        <a href="/" class="navbar-brand">CARBIKE <span>Rental</span></a>
+        <div class="nav-right">
+            <a href="/" class="nav-link btn-home">Back to Vehicles</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="page-header">
+            <h1>Booking &amp; Payment</h1>
+            <p>Select your dates, enter estimated KM, and complete payment.</p>
+        </div>
+
+        <div class="booking-grid">
+            <!-- Vehicle Summary -->
+            <div class="vehicle-summary">
+                <h3>Vehicle Details</h3>
+
+                <div class="summary-img" th:if="${vehicle.imageUrl == null or vehicle.imageUrl.isEmpty()}">
+                    <span th:utext="${vehicle.type == 'CAR'} ? '&#128663;' : '&#128690;'"></span>
+                </div>
+                <div class="summary-img" th:unless="${vehicle.imageUrl == null or vehicle.imageUrl.isEmpty()}" style="padding:0;">
+                    <img th:src="${vehicle.imageUrl}" alt="Vehicle">
+                </div>
+
+                <div class="summary-row">
+                    <span class="summary-label">Vehicle</span>
+                    <span class="summary-value" th:text="${vehicle.company} + ' ' + ${vehicle.model}"></span>
+                </div>
+                <div class="summary-row">
+                    <span class="summary-label">Type</span>
+                    <span class="summary-value" th:text="${vehicle.type}"></span>
+                </div>
+                <div class="summary-row">
+                    <span class="summary-label">Fuel</span>
+                    <span class="summary-value" th:text="${vehicle.fuelType}"></span>
+                </div>
+                <div class="summary-row">
+                    <span class="summary-label">Seats</span>
+                    <span class="summary-value" th:text="${vehicle.seatingCapacity}"></span>
+                </div>
+                <div class="summary-row">
+                    <span class="summary-label">Price Per KM</span>
+                    <span class="summary-value" th:text="${vehicle.pricePerKm != null} ? '&#8377;' + ${#numbers.formatDecimal(vehicle.pricePerKm, 1, 0)} + ' / km' : 'TBD'"></span>
+                </div>
+
+                <!-- Live Price Breakdown -->
+                <div class="price-breakdown" id="priceBreakdown">
+                    <h4>&#128176; Price Breakdown</h4>
+                    <div class="breakdown-row">
+                        <span>Rate per KM</span>
+                        <span id="ratePerKm" th:text="${vehicle.pricePerKm != null} ? '&#8377;' + ${#numbers.formatDecimal(vehicle.pricePerKm, 1, 0)} : '&#8377;0'"></span>
+                    </div>
+                    <div class="breakdown-row">
+                        <span>Estimated KM</span>
+                        <span id="displayKm">0 km</span>
+                    </div>
+                    <div class="breakdown-row">
+                        <span>Number of Days</span>
+                        <span id="displayDays">0 days</span>
+                    </div>
+                    <div class="breakdown-row total">
+                        <span>Total Amount</span>
+                        <span class="total-price" id="totalAmount">&#8377;0</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Payment Form -->
+            <div class="payment-form">
+                <h3>Booking Details</h3>
+
+                <div class="form-group">
+                    <label>Booking For</label>
+                    <input type="text" th:value="${user != null ? user.fullName : ''}" readonly
+                           style="color:#00d2ff; font-weight:600;">
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="text" th:value="${user != null ? user.email : ''}" readonly>
+                </div>
+                <div class="form-group">
+                    <label>Phone</label>
+                    <input type="text" th:value="${user != null ? user.phone : ''}" readonly>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>&#128197; Start Date</label>
+                        <input type="date" id="startDate" onchange="calculateTotal()">
+                    </div>
+                    <div class="form-group">
+                        <label>&#128197; End Date</label>
+                        <input type="date" id="endDate" onchange="calculateTotal()">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>&#128207; Estimated Kilometers</label>
+                    <input type="number" id="estimatedKm" placeholder="e.g. 150" min="1" oninput="calculateTotal()">
+                </div>
+
+                <div class="form-group">
+                    <label>Payment Method</label>
+                    <div class="payment-methods">
+                        <div class="payment-method active" onclick="selectPayment(this, 'upi')">
+                            <span class="payment-method-icon">&#128178;</span>
+                            UPI
+                        </div>
+                        <div class="payment-method" onclick="selectPayment(this, 'card')">
+                            <span class="payment-method-icon">&#128179;</span>
+                            Card
+                        </div>
+                        <div class="payment-method" onclick="selectPayment(this, 'netbanking')">
+                            <span class="payment-method-icon">&#127974;</span>
+                            Net Banking
+                        </div>
+                    </div>
+                </div>
+
+                <div id="upi-section">
+                    <div class="form-group">
+                        <label>UPI ID</label>
+                        <input type="text" placeholder="yourname@upi">
+                    </div>
+                </div>
+
+                <div id="card-section" style="display:none;">
+                    <div class="form-group">
+                        <label>Card Number</label>
+                        <input type="text" placeholder="1234 5678 9012 3456" maxlength="19">
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Expiry Date</label>
+                            <input type="text" placeholder="MM/YY" maxlength="5">
+                        </div>
+                        <div class="form-group">
+                            <label>CVV</label>
+                            <input type="password" placeholder="***" maxlength="3">
+                        </div>
+                    </div>
+                </div>
+
+                <div id="netbanking-section" style="display:none;">
+                    <div class="form-group">
+                        <label>Select Bank</label>
+                        <select>
+                            <option value="">Choose your bank</option>
+                            <option>SBI</option>
+                            <option>HDFC</option>
+                            <option>ICICI</option>
+                            <option>Axis</option>
+                            <option>Kotak</option>
+                        </select>
+                    </div>
+                </div>
+
+                <a th:href="@{/booking/{id}/confirm(id=${vehicle.id})}" class="btn-pay" id="payBtn">
+                    Pay Now
+                </a>
+
+                <div class="secure-note">&#128274; Your payment is secure and encrypted</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">&copy; 2026 Car &amp; Bike Rental. All rights reserved.</div>
+
+    <script th:inline="javascript">
+        var pricePerKm = [[${vehicle.pricePerKm}]];
+
+        function calculateTotal() {
+            var startDate = document.getElementById('startDate').value;
+            var endDate = document.getElementById('endDate').value;
+            var km = parseFloat(document.getElementById('estimatedKm').value) || 0;
+
+            var days = 0;
+            if (startDate && endDate) {
+                var start = new Date(startDate);
+                var end = new Date(endDate);
+                var diff = Math.ceil((end - start) / (1000 * 60 * 60 * 24));
+                days = diff > 0 ? diff : 0;
+            }
+
+            var total = (pricePerKm || 0) * km;
+
+            document.getElementById('displayKm').textContent = km + ' km';
+            document.getElementById('displayDays').textContent = days + ' days';
+            document.getElementById('totalAmount').textContent = '\u20B9' + total.toLocaleString('en-IN');
+        }
+
+        function selectPayment(el, method) {
+            document.querySelectorAll('.payment-method').forEach(function(m) { m.classList.remove('active'); });
+            el.classList.add('active');
+            document.getElementById('upi-section').style.display = method === 'upi' ? 'block' : 'none';
+            document.getElementById('card-section').style.display = method === 'card' ? 'block' : 'none';
+            document.getElementById('netbanking-section').style.display = method === 'netbanking' ? 'block' : 'none';
+        }
+
+        // Set min dates to today
+        var today = new Date().toISOString().split('T')[0];
+        document.getElementById('startDate').setAttribute('min', today);
+        document.getElementById('endDate').setAttribute('min', today);
+    </script>
+
+</body>
+</html>

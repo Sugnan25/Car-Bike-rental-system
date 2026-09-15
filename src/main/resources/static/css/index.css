@@ -1,0 +1,233 @@
+* { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; background: #0f0f0f; color: #fff; }
+
+        /* ===== NAVBAR ===== */
+        .nav {
+            position: fixed; top: 0; width: 100%; padding: 18px 50px;
+            display: flex; justify-content: space-between; align-items: center;
+            background: rgba(15,15,15,0.85); backdrop-filter: blur(12px); z-index: 100;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        .nav-brand { font-size: 22px; font-weight: 700; color: #00d2ff; text-decoration: none; letter-spacing: 1px; }
+        .nav-links { display: flex; gap: 12px; align-items: center; }
+        .nav-links a {
+            color: #ccc; text-decoration: none; padding: 9px 22px;
+            border-radius: 8px; font-size: 14px; transition: all 0.3s;
+        }
+        .nav-links a:hover { color: #fff; background: rgba(255,255,255,0.08); }
+        .btn-nav-login { border: 1px solid #00d2ff !important; color: #00d2ff !important; }
+        .btn-nav-login:hover { background: rgba(0,210,255,0.12) !important; }
+        .btn-nav-register { background: #00d2ff !important; color: #000 !important; font-weight: 600; }
+        .btn-nav-register:hover { background: #00b8d9 !important; }
+
+        /* ===== HERO ===== */
+        .hero {
+            min-height: 100vh; display: flex; flex-direction: column;
+            align-items: center; justify-content: center; text-align: center;
+            padding: 120px 20px 80px; position: relative; overflow: hidden;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+        }
+        .hero::before {
+            content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+            background: radial-gradient(circle at 30% 50%, rgba(0,210,255,0.06) 0%, transparent 50%),
+                        radial-gradient(circle at 70% 50%, rgba(139,92,246,0.06) 0%, transparent 50%);
+            animation: pulse 8s ease-in-out infinite;
+        }
+        @keyframes pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+
+        .hero-content { position: relative; z-index: 1; max-width: 750px; }
+        .hero-badge {
+            display: inline-block; padding: 7px 18px;
+            background: rgba(0,210,255,0.1); border: 1px solid rgba(0,210,255,0.3);
+            border-radius: 50px; font-size: 12px; color: #00d2ff;
+            margin-bottom: 25px; letter-spacing: 2px; text-transform: uppercase;
+        }
+        .hero h1 {
+            font-size: 54px; font-weight: 800; line-height: 1.12; margin-bottom: 20px;
+            background: linear-gradient(135deg, #fff 0%, #00d2ff 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+        }
+        .hero p { font-size: 18px; color: #999; margin-bottom: 40px; line-height: 1.7; }
+        .hero-buttons { display: flex; gap: 15px; justify-content: center; flex-wrap: wrap; }
+        .btn {
+            display: inline-block; padding: 15px 38px; border-radius: 8px;
+            font-size: 16px; font-weight: 600; text-decoration: none;
+            transition: all 0.3s; cursor: pointer; border: none;
+        }
+        .btn-primary { background: linear-gradient(135deg, #00d2ff, #0090b3); color: #000; box-shadow: 0 4px 25px rgba(0,210,255,0.3); }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 30px rgba(0,210,255,0.4); }
+        .btn-outline { background: transparent; color: #fff; border: 2px solid rgba(255,255,255,0.2); }
+        .btn-outline:hover { border-color: #fff; background: rgba(255,255,255,0.05); }
+
+        .hero-stats {
+            display: flex; gap: 50px; justify-content: center; margin-top: 50px;
+            position: relative; z-index: 1;
+        }
+        .stat { text-align: center; }
+        .stat-num { font-size: 32px; font-weight: 800; color: #00d2ff; }
+        .stat-label { font-size: 13px; color: #888; margin-top: 4px; }
+
+        /* ===== SECTION COMMON ===== */
+        section { padding: 90px 50px; }
+        .section-header { text-align: center; margin-bottom: 50px; }
+        .section-header .badge {
+            display: inline-block; padding: 5px 14px;
+            background: rgba(0,210,255,0.08); border: 1px solid rgba(0,210,255,0.2);
+            border-radius: 50px; font-size: 11px; color: #00d2ff;
+            letter-spacing: 2px; text-transform: uppercase; margin-bottom: 15px;
+        }
+        .section-header h2 { font-size: 34px; font-weight: 700; margin-bottom: 10px; }
+        .section-header p { color: #888; font-size: 16px; max-width: 550px; margin: 0 auto; }
+
+        /* ===== OFFERS BANNER ===== */
+        .offers-banner {
+            background: linear-gradient(135deg, #0f3460 0%, #1a1a2e 100%);
+            border-top: 1px solid #2a2a4a; border-bottom: 1px solid #2a2a4a;
+            padding: 40px 50px;
+        }
+        .offers-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px; max-width: 1100px; margin: 0 auto;
+        }
+        .offer-card {
+            background: rgba(0,210,255,0.05); border: 1px solid rgba(0,210,255,0.15);
+            border-radius: 12px; padding: 25px 28px; display: flex;
+            align-items: center; gap: 18px; transition: all 0.3s;
+        }
+        .offer-card:hover { border-color: #00d2ff; transform: translateY(-2px); }
+        .offer-icon { font-size: 36px; flex-shrink: 0; }
+        .offer-text h3 { font-size: 16px; color: #fff; margin-bottom: 4px; }
+        .offer-text p { font-size: 13px; color: #888; line-height: 1.5; }
+        .offer-tag {
+            display: inline-block; padding: 3px 10px; background: rgba(16,185,129,0.1);
+            color: #10b981; border-radius: 4px; font-size: 11px; font-weight: 700;
+            margin-top: 6px;
+        }
+
+        /* ===== VEHICLES ===== */
+        .vehicles-section { background: #0f0f0f; }
+        .vehicles-grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 25px; max-width: 1200px; margin: 0 auto;
+        }
+        .vehicle-card {
+            background: #1a1a2e; border: 1px solid #2a2a4a; border-radius: 14px;
+            overflow: hidden; transition: all 0.3s;
+        }
+        .vehicle-card:hover { border-color: #00d2ff; transform: translateY(-4px); }
+        .vehicle-img {
+            width: 100%; height: 190px; object-fit: cover;
+            background: linear-gradient(135deg, #16213e, #0f3460);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 60px; color: #00d2ff;
+        }
+        .vehicle-body { padding: 22px; }
+        .vehicle-type {
+            display: inline-block; padding: 3px 10px; border-radius: 4px;
+            font-size: 11px; font-weight: 700; text-transform: uppercase;
+            margin-bottom: 10px;
+        }
+        .type-car { background: rgba(0,210,255,0.1); color: #00d2ff; }
+        .type-bike { background: rgba(139,92,246,0.1); color: #8b5cf6; }
+        .vehicle-body h3 { font-size: 18px; margin-bottom: 4px; }
+        .vehicle-body .vehicle-company { font-size: 13px; color: #888; margin-bottom: 12px; }
+        .vehicle-details {
+            display: flex; gap: 15px; margin-bottom: 15px; flex-wrap: wrap;
+        }
+        .vehicle-detail {
+            font-size: 12px; color: #aaa;
+            display: flex; align-items: center; gap: 4px;
+        }
+        .vehicle-price {
+            display: flex; align-items: baseline; gap: 4px; margin-bottom: 18px;
+        }
+        .vehicle-price .price { font-size: 24px; font-weight: 800; color: #00d2ff; }
+        .vehicle-price .per { font-size: 13px; color: #888; }
+        .vehicle-actions { display: flex; gap: 10px; }
+        .btn-billing {
+            flex: 1; padding: 11px; background: linear-gradient(135deg, #00d2ff, #0090b3);
+            border: none; border-radius: 8px; color: #000; font-size: 14px;
+            font-weight: 700; text-decoration: none; text-align: center;
+            transition: all 0.3s; cursor: pointer;
+        }
+        .btn-billing:hover { box-shadow: 0 4px 20px rgba(0,210,255,0.3); }
+        .btn-details {
+            padding: 11px 18px; background: rgba(255,255,255,0.05);
+            border: 1px solid #2a2a4a; border-radius: 8px; color: #aaa;
+            font-size: 14px; text-decoration: none; transition: all 0.3s;
+        }
+        .btn-details:hover { border-color: #fff; color: #fff; }
+
+        .empty-vehicles {
+            text-align: center; padding: 60px 20px; color: #555;
+            max-width: 1200px; margin: 0 auto;
+        }
+
+        /* ===== FEATURES ===== */
+        .features-section { background: #0f0f0f; }
+        .features-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px; max-width: 1100px; margin: 0 auto;
+        }
+        .feature-card {
+            background: #1a1a2e; border: 1px solid #2a2a4a; border-radius: 12px;
+            padding: 35px 28px; text-align: center; transition: all 0.3s;
+        }
+        .feature-card:hover { border-color: #00d2ff; transform: translateY(-4px); }
+        .feature-icon { font-size: 40px; margin-bottom: 15px; display: block; }
+        .feature-card h3 { font-size: 18px; margin-bottom: 10px; color: #fff; }
+        .feature-card p { font-size: 14px; color: #888; line-height: 1.6; }
+
+        /* ===== DEALS ===== */
+        .deals-section {
+            background: linear-gradient(135deg, #16213e 0%, #1a1a2e 100%);
+            border-top: 1px solid #2a2a4a; border-bottom: 1px solid #2a2a4a;
+        }
+        .deals-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 25px; max-width: 1100px; margin: 0 auto;
+        }
+        .deal-card {
+            background: rgba(0,0,0,0.3); border: 1px solid #2a2a4a;
+            border-radius: 14px; padding: 35px 30px; position: relative;
+            overflow: hidden; transition: all 0.3s;
+        }
+        .deal-card:hover { border-color: #00d2ff; }
+        .deal-tag {
+            position: absolute; top: 15px; right: 15px;
+            padding: 5px 12px; background: rgba(239,68,68,0.15);
+            color: #ef4444; border-radius: 6px; font-size: 12px; font-weight: 700;
+        }
+        .deal-card h3 { font-size: 22px; font-weight: 700; margin-bottom: 8px; }
+        .deal-card p { font-size: 14px; color: #888; line-height: 1.6; margin-bottom: 18px; }
+        .deal-price {
+            font-size: 28px; font-weight: 800;
+            background: linear-gradient(135deg, #10b981, #059669);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+        }
+        .deal-price span { font-size: 14px; color: #888; font-weight: 400; -webkit-text-fill-color: #888; }
+
+        /* ===== CTA ===== */
+        .cta-section {
+            text-align: center; padding: 90px 20px;
+            background: #0f0f0f;
+        }
+        .cta-section h2 { font-size: 36px; font-weight: 700; margin-bottom: 15px; }
+        .cta-section p { color: #888; font-size: 16px; margin-bottom: 35px; max-width: 500px; margin-left: auto; margin-right: auto; }
+
+        /* ===== FOOTER ===== */
+        .footer {
+            text-align: center; padding: 35px;
+            color: #444; font-size: 13px;
+            border-top: 1px solid #1a1a2e;
+        }
+
+        @media (max-width: 768px) {
+            .nav { padding: 15px 20px; }
+            section { padding: 60px 20px; }
+            .hero { padding: 100px 20px 60px; }
+            .hero h1 { font-size: 32px; }
+            .hero-stats { gap: 25px; flex-wrap: wrap; }
+            .stat-num { font-size: 24px; }
+            .offers-banner { padding: 30px 20px; }
+        }

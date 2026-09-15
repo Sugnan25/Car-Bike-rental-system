@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Dashboard</title>
+    <link rel="stylesheet" th:href="@{/css/user-dashboard.css}">
+</head>
+<body>
+
+    <nav class="navbar">
+        <a href="/" class="navbar-brand">CARBIKE <span>Rental</span></a>
+        <div class="nav-right">
+            <a href="/" class="nav-link btn-home">Home</a>
+            <a href="/logout" class="nav-link btn-primary">Logout</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="welcome">
+            <h2>Welcome, <span th:text="${user != null ? user.fullName : 'User'}">User</span></h2>
+            <p>Manage your rentals and account from here.</p>
+        </div>
+
+        <div class="profile-card">
+            <h3>Your Profile</h3>
+            <div class="profile-row">
+                <span class="profile-label">Full Name</span>
+                <span class="profile-value" th:text="${user != null ? user.fullName : '-'}"></span>
+            </div>
+            <div class="profile-row">
+                <span class="profile-label">Email</span>
+                <span class="profile-value" th:text="${user != null ? user.email : '-'}"></span>
+            </div>
+            <div class="profile-row">
+                <span class="profile-label">Phone</span>
+                <span class="profile-value" th:text="${user != null ? user.phone : '-'}"></span>
+            </div>
+            <div class="profile-row">
+                <span class="profile-label">Role</span>
+                <span class="profile-value" th:text="${user != null ? user.role : '-'}"></span>
+            </div>
+        </div>
+
+        <div class="cards">
+            <div class="card">
+                <div class="card-icon icon-blue">&#128663;</div>
+                <h3>Browse Vehicles</h3>
+                <p>Explore our fleet of cars and bikes available for rent.</p>
+                <a href="/" class="card-link">View Vehicles &#8594;</a>
+            </div>
+            <div class="card">
+                <div class="card-icon icon-green">&#128176;</div>
+                <h3>My Bookings</h3>
+                <p>View your rental history and active bookings.</p>
+                <a href="#" class="card-link">Coming Soon &#8594;</a>
+            </div>
+            <div class="card">
+                <div class="card-icon icon-purple">&#128100;</div>
+                <h3>Account Settings</h3>
+                <p>Update your profile and account preferences.</p>
+                <a href="#" class="card-link">Coming Soon &#8594;</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">&copy; 2026 Car &amp; Bike Rental. All rights reserved.</div>
+
+</body>
+</html>
