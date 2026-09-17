@@ -22,26 +22,6 @@
             <p>Manage your rentals and account from here.</p>
         </div>
 
-        <div class="profile-card">
-            <h3>Your Profile</h3>
-            <div class="profile-row">
-                <span class="profile-label">Full Name</span>
-                <span class="profile-value" th:text="${user != null ? user.fullName : '-'}"></span>
-            </div>
-            <div class="profile-row">
-                <span class="profile-label">Email</span>
-                <span class="profile-value" th:text="${user != null ? user.email : '-'}"></span>
-            </div>
-            <div class="profile-row">
-                <span class="profile-label">Phone</span>
-                <span class="profile-value" th:text="${user != null ? user.phone : '-'}"></span>
-            </div>
-            <div class="profile-row">
-                <span class="profile-label">Role</span>
-                <span class="profile-value" th:text="${user != null ? user.role : '-'}"></span>
-            </div>
-        </div>
-
         <div class="cards">
             <div class="card">
                 <div class="card-icon icon-blue">&#128663;</div>
@@ -52,14 +32,14 @@
             <div class="card">
                 <div class="card-icon icon-green">&#128176;</div>
                 <h3>My Bookings</h3>
-                <p>View your rental history and active bookings.</p>
-                <a href="#" class="card-link">Coming Soon &#8594;</a>
+                <p>Track your booking requests, approvals and payments.</p>
+                <a href="/user/bookings" class="card-link">View Bookings &#8594;</a>
             </div>
             <div class="card">
                 <div class="card-icon icon-purple">&#128100;</div>
                 <h3>Account Settings</h3>
-                <p>Update your profile and account preferences.</p>
-                <a href="#" class="card-link">Coming Soon &#8594;</a>
+                <p>Update your profile details and change your password.</p>
+                <a href="/user/settings" class="card-link">Manage Settings &#8594;</a>
             </div>
         </div>
     </div>

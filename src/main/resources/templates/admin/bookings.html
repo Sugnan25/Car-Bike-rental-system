@@ -11,6 +11,9 @@
     <nav class="navbar">
         <a href="/admin" class="navbar-brand">CARBIKE <span>Admin</span></a>
         <div class="nav-right">
+            <span class="notif-badge" th:if="${pendingCount > 0}">
+                &#128276; <span th:text="${pendingCount}"></span> pending
+            </span>
             <a href="/admin" class="nav-link btn-back">Dashboard</a>
         </div>
     </nav>
@@ -18,13 +21,70 @@
     <div class="container">
         <div class="page-header">
             <h1>Bookings</h1>
-            <p>View and manage customer bookings.</p>
+            <p>Review customer booking requests and accept or reject them.</p>
         </div>
 
-        <div class="empty-state">
+        <div class="pending-banner" th:if="${pendingCount > 0}">
+            &#128276; You have <strong th:text="${pendingCount}"></strong>
+            <span th:text="${pendingCount == 1} ? 'pending booking request' : 'pending booking requests'"></span>
+            waiting for approval.
+        </div>
+
+        <div class="empty-state" th:if="${#lists.isEmpty(bookings)}">
             <span class="icon">&#128197;</span>
             <h3>No Bookings Yet</h3>
             <p>Bookings will appear here once customers start renting vehicles.</p>
+        </div>
+
+        <div class="table-wrap" th:unless="${#lists.isEmpty(bookings)}">
+            <table class="bookings-table">
+                <thead>
+                    <tr>
+                        <th>Customer</th>
+                        <th>Vehicle</th>
+                        <th>Dates</th>
+                        <th>Est. KM</th>
+                        <th>Total</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="b : ${bookings}" th:classappend="${b.status == 'PENDING'} ? 'row-pending' : ''">
+                        <td>
+                            <div class="cell-strong" th:text="${b.userName}"></div>
+                            <div class="cell-sub" th:text="${b.userEmail}"></div>
+                            <div class="cell-sub" th:text="${b.userPhone}"></div>
+                        </td>
+                        <td>
+                            <div class="cell-strong" th:text="${b.vehicleName}"></div>
+                            <div class="cell-sub" th:text="${b.vehicleNumber}"></div>
+                        </td>
+                        <td>
+                            <div th:text="${b.startDate} + ' to '"></div>
+                            <div th:text="${b.endDate}"></div>
+                        </td>
+                        <td th:text="${b.estimatedKm} + ' km'"></td>
+                        <td class="amount" th:text="'&#8377;' + ${#numbers.formatDecimal(b.totalAmount, 1, 0)}"></td>
+                        <td>
+                            <span class="badge badge-pending" th:if="${b.status == 'PENDING'}">Pending</span>
+                            <span class="badge badge-accepted" th:if="${b.status == 'ACCEPTED'}">Accepted</span>
+                            <span class="badge badge-paid" th:if="${b.status == 'PAID'}">Paid</span>
+                            <span class="badge badge-rejected" th:if="${b.status == 'REJECTED'}">Rejected</span>
+                        </td>
+                        <td>
+                            <div class="actions">
+                                <a th:if="${b.status == 'PENDING'}"
+                                   th:href="@{/admin/bookings/accept/{id}(id=${b.id})}" class="btn-accept">Accept</a>
+                                <a th:if="${b.status == 'PENDING'}"
+                                   th:href="@{/admin/bookings/reject/{id}(id=${b.id})}" class="btn-reject">Reject</a>
+                                <a th:href="@{/admin/bookings/delete/{id}(id=${b.id})}" class="btn-delete"
+                                   onclick="return confirm('Delete this booking record?')">Delete</a>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
     </div>
 

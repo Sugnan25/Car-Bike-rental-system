@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment</title>
+    <link rel="stylesheet" th:href="@{/css/payment.css}">
+</head>
+<body>
+
+    <nav class="navbar">
+        <a href="/" class="navbar-brand">CARBIKE <span>Rental</span></a>
+        <div class="nav-right">
+            <a href="/user/bookings" class="nav-link btn-home">My Bookings</a>
+            <a href="/" class="nav-link btn-home">Back to Vehicles</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="page-header">
+            <h1>Complete Payment</h1>
+            <p>Your booking request was approved. Pay now to confirm your rental.</p>
+            <div class="approved-banner">&#9989; Booking Approved by Admin</div>
+        </div>
+
+        <div class="booking-grid">
+            <!-- Booking Summary -->
+            <div class="vehicle-summary">
+                <h3>Booking Summary</h3>
+
+                <div class="summary-row">
+                    <span class="summary-label">Booking ID</span>
+                    <span class="summary-value" th:text="${#strings.substring(booking.id, 0, 8)}"></span>
+                </div>
+                <div class="summary-row">
+                    <span class="summary-label">Vehicle</span>
+                    <span class="summary-value" th:text="${booking.vehicleName}"></span>
+                </div>
+                <div class="summary-row" th:if="${booking.vehicleNumber != null}">
+                    <span class="summary-label">Vehicle No.</span>
+                    <span class="summary-value" th:text="${booking.vehicleNumber}"></span>
+                </div>
+                <div class="summary-row">
+                    <span class="summary-label">Booked By</span>
+                    <span class="summary-value" th:text="${booking.userName}"></span>
+                </div>
+                <div class="summary-row">
+                    <span class="summary-label">Start Date</span>
+                    <span class="summary-value" th:text="${booking.startDate}"></span>
+                </div>
+                <div class="summary-row">
+                    <span class="summary-label">End Date</span>
+                    <span class="summary-value" th:text="${booking.endDate}"></span>
+                </div>
+
+                <div class="price-breakdown">
+                    <h4>&#128176; Amount Due</h4>
+                    <div class="breakdown-row">
+                        <span>Rate per KM</span>
+                        <span th:text="${booking.pricePerKm != null} ? '&#8377;' + ${#numbers.formatDecimal(booking.pricePerKm, 1, 0)} : '&#8377;0'"></span>
+                    </div>
+                    <div class="breakdown-row">
+                        <span>Estimated KM</span>
+                        <span th:text="${booking.estimatedKm} + ' km'"></span>
+                    </div>
+                    <div class="breakdown-row total">
+                        <span>Total Amount</span>
+                        <span class="total-price" th:text="'&#8377;' + ${#numbers.formatDecimal(booking.totalAmount, 1, 0)}"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Payment Form -->
+            <div class="payment-form">
+                <h3>Payment Method</h3>
+
+                <form th:action="@{/booking/pay/{id}(id=${booking.id})}" method="post">
+                    <input type="hidden" name="paymentMethod" id="paymentMethod" value="upi">
+
+                    <div class="payment-methods">
+                        <div class="payment-method active" onclick="selectPayment(this, 'upi')">
+                            <span class="payment-method-icon">&#128178;</span>
+                            UPI
+                        </div>
+                        <div class="payment-method" onclick="selectPayment(this, 'card')">
+                            <span class="payment-method-icon">&#128179;</span>
+                            Card
+                        </div>
+                        <div class="payment-method" onclick="selectPayment(this, 'netbanking')">
+                            <span class="payment-method-icon">&#127974;</span>
+                            Net Banking
+                        </div>
+                    </div>
+
+                    <div id="upi-section">
+                        <div class="form-group">
+                            <label>UPI ID</label>
+                            <input type="text" placeholder="yourname@upi">
+                        </div>
+                    </div>
+
+                    <div id="card-section" style="display:none;">
+                        <div class="form-group">
+                            <label>Card Number</label>
+                            <input type="text" placeholder="1234 5678 9012 3456" maxlength="19">
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Expiry Date</label>
+                                <input type="text" placeholder="MM/YY" maxlength="5">
+                            </div>
+                            <div class="form-group">
+                                <label>CVV</label>
+                                <input type="password" placeholder="***" maxlength="3">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="netbanking-section" style="display:none;">
+                        <div class="form-group">
+                            <label>Select Bank</label>
+                            <select>
+                                <option value="">Choose your bank</option>
+                                <option>SBI</option>
+                                <option>HDFC</option>
+                                <option>ICICI</option>
+                                <option>Axis</option>
+                                <option>Kotak</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-pay">Pay Now</button>
+
+                    <div class="secure-note">&#128274; Your payment is secure and encrypted</div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">&copy; 2026 Car &amp; Bike Rental. All rights reserved.</div>
+
+    <script>
+        function selectPayment(el, method) {
+            document.querySelectorAll('.payment-method').forEach(function(m) { m.classList.remove('active'); });
+            el.classList.add('active');
+            document.getElementById('paymentMethod').value = method;
+            document.getElementById('upi-section').style.display = method === 'upi' ? 'block' : 'none';
+            document.getElementById('card-section').style.display = method === 'card' ? 'block' : 'none';
+            document.getElementById('netbanking-section').style.display = method === 'netbanking' ? 'block' : 'none';
+        }
+    </script>
+
+</body>
+</html>

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Booking &amp; Payment</title>
+    <title>Book Vehicle</title>
     <link rel="stylesheet" th:href="@{/css/payment.css}">
 </head>
 <body>
@@ -11,14 +11,15 @@
     <nav class="navbar">
         <a href="/" class="navbar-brand">CARBIKE <span>Rental</span></a>
         <div class="nav-right">
+            <a href="/user/dashboard" class="nav-link btn-home">Dashboard</a>
             <a href="/" class="nav-link btn-home">Back to Vehicles</a>
         </div>
     </nav>
 
     <div class="container">
         <div class="page-header">
-            <h1>Booking &amp; Payment</h1>
-            <p>Select your dates, enter estimated KM, and complete payment.</p>
+            <h1>Book Vehicle</h1>
+            <p>Select your dates and estimated KM, then send your booking request for approval.</p>
         </div>
 
         <div class="booking-grid">
@@ -76,101 +77,48 @@
                 </div>
             </div>
 
-            <!-- Payment Form -->
+            <!-- Booking Request Form -->
             <div class="payment-form">
                 <h3>Booking Details</h3>
 
-                <div class="form-group">
-                    <label>Booking For</label>
-                    <input type="text" th:value="${user != null ? user.fullName : ''}" readonly
-                           style="color:#00d2ff; font-weight:600;">
-                </div>
-                <div class="form-group">
-                    <label>Email</label>
-                    <input type="text" th:value="${user != null ? user.email : ''}" readonly>
-                </div>
-                <div class="form-group">
-                    <label>Phone</label>
-                    <input type="text" th:value="${user != null ? user.phone : ''}" readonly>
-                </div>
+                <form th:action="@{/booking/{id}(id=${vehicle.id})}" method="post">
 
-                <div class="form-row">
                     <div class="form-group">
-                        <label>&#128197; Start Date</label>
-                        <input type="date" id="startDate" onchange="calculateTotal()">
+                        <label>Booking For</label>
+                        <input type="text" th:value="${user != null ? user.fullName : ''}" readonly
+                               style="color:#00d2ff; font-weight:600;">
                     </div>
                     <div class="form-group">
-                        <label>&#128197; End Date</label>
-                        <input type="date" id="endDate" onchange="calculateTotal()">
+                        <label>Email</label>
+                        <input type="text" th:value="${user != null ? user.email : ''}" readonly>
                     </div>
-                </div>
-
-                <div class="form-group">
-                    <label>&#128207; Estimated Kilometers</label>
-                    <input type="number" id="estimatedKm" placeholder="e.g. 150" min="1" oninput="calculateTotal()">
-                </div>
-
-                <div class="form-group">
-                    <label>Payment Method</label>
-                    <div class="payment-methods">
-                        <div class="payment-method active" onclick="selectPayment(this, 'upi')">
-                            <span class="payment-method-icon">&#128178;</span>
-                            UPI
-                        </div>
-                        <div class="payment-method" onclick="selectPayment(this, 'card')">
-                            <span class="payment-method-icon">&#128179;</span>
-                            Card
-                        </div>
-                        <div class="payment-method" onclick="selectPayment(this, 'netbanking')">
-                            <span class="payment-method-icon">&#127974;</span>
-                            Net Banking
-                        </div>
-                    </div>
-                </div>
-
-                <div id="upi-section">
                     <div class="form-group">
-                        <label>UPI ID</label>
-                        <input type="text" placeholder="yourname@upi">
+                        <label>Phone</label>
+                        <input type="text" th:value="${user != null ? user.phone : ''}" readonly>
                     </div>
-                </div>
 
-                <div id="card-section" style="display:none;">
-                    <div class="form-group">
-                        <label>Card Number</label>
-                        <input type="text" placeholder="1234 5678 9012 3456" maxlength="19">
-                    </div>
                     <div class="form-row">
                         <div class="form-group">
-                            <label>Expiry Date</label>
-                            <input type="text" placeholder="MM/YY" maxlength="5">
+                            <label>&#128197; Start Date</label>
+                            <input type="date" id="startDate" name="startDate" required onchange="calculateTotal()">
                         </div>
                         <div class="form-group">
-                            <label>CVV</label>
-                            <input type="password" placeholder="***" maxlength="3">
+                            <label>&#128197; End Date</label>
+                            <input type="date" id="endDate" name="endDate" required onchange="calculateTotal()">
                         </div>
                     </div>
-                </div>
 
-                <div id="netbanking-section" style="display:none;">
                     <div class="form-group">
-                        <label>Select Bank</label>
-                        <select>
-                            <option value="">Choose your bank</option>
-                            <option>SBI</option>
-                            <option>HDFC</option>
-                            <option>ICICI</option>
-                            <option>Axis</option>
-                            <option>Kotak</option>
-                        </select>
+                        <label>&#128207; Estimated Kilometers</label>
+                        <input type="number" id="estimatedKm" name="estimatedKm" placeholder="e.g. 150" min="1" required oninput="calculateTotal()">
                     </div>
-                </div>
 
-                <a th:href="@{/booking/{id}/confirm(id=${vehicle.id})}" class="btn-pay" id="payBtn">
-                    Pay Now
-                </a>
+                    <button type="submit" class="btn-pay" id="bookBtn">
+                        Book Now
+                    </button>
 
-                <div class="secure-note">&#128274; Your payment is secure and encrypted</div>
+                    <div class="secure-note">&#9989; Your request will be sent to the admin for approval. You can pay once it is accepted.</div>
+                </form>
             </div>
         </div>
     </div>
@@ -198,14 +146,6 @@
             document.getElementById('displayKm').textContent = km + ' km';
             document.getElementById('displayDays').textContent = days + ' days';
             document.getElementById('totalAmount').textContent = '\u20B9' + total.toLocaleString('en-IN');
-        }
-
-        function selectPayment(el, method) {
-            document.querySelectorAll('.payment-method').forEach(function(m) { m.classList.remove('active'); });
-            el.classList.add('active');
-            document.getElementById('upi-section').style.display = method === 'upi' ? 'block' : 'none';
-            document.getElementById('card-section').style.display = method === 'card' ? 'block' : 'none';
-            document.getElementById('netbanking-section').style.display = method === 'netbanking' ? 'block' : 'none';
         }
 
         // Set min dates to today

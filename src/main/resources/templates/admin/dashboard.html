@@ -45,6 +45,8 @@
 
             <div class="card">
                 <div class="card-icon icon-orange">&#128197;</div>
+                <span class="pending-dot" th:if="${pendingBookings > 0}"
+                      th:text="${pendingBookings} + ' new'">0 new</span>
                 <h3>Bookings</h3>
                 <p>View and manage customer bookings.</p>
                 <a href="/admin/bookings" class="card-link">Manage Bookings &#8594;</a>

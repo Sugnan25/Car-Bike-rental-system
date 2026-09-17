@@ -1,7 +1,9 @@
 package com.rental.carbikerental.controller;
 
+import com.rental.carbikerental.entity.Booking;
 import com.rental.carbikerental.entity.Vehicle;
 import com.rental.carbikerental.repository.UserRepository;
+import com.rental.carbikerental.service.BookingService;
 import com.rental.carbikerental.service.VehicleService;
 import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -24,11 +26,13 @@ public class AdminController {
     private final VehicleService vehicleService;
     private final UserRepository userRepository;
     private final GridFsTemplate gridFsTemplate;
+    private final BookingService bookingService;
 
-    public AdminController(VehicleService vehicleService, UserRepository userRepository, GridFsTemplate gridFsTemplate) {
+    public AdminController(VehicleService vehicleService, UserRepository userRepository, GridFsTemplate gridFsTemplate, BookingService bookingService) {
         this.vehicleService = vehicleService;
         this.userRepository = userRepository;
         this.gridFsTemplate = gridFsTemplate;
+        this.bookingService = bookingService;
     }
 
     @GetMapping
@@ -153,8 +157,28 @@ private void deleteImage(String imageUrl) {
 }
 
 @GetMapping("/bookings")
-public String adminBookings() {
+public String adminBookings(Model model) {
+    model.addAttribute("bookings", bookingService.getAllBookings());
+    model.addAttribute("pendingCount", bookingService.countPending());
     return "admin/bookings";
+}
+
+@GetMapping("/bookings/accept/{id}")
+public String acceptBooking(@PathVariable String id) {
+    bookingService.updateStatus(id, Booking.STATUS_ACCEPTED);
+    return "redirect:/admin/bookings";
+}
+
+@GetMapping("/bookings/reject/{id}")
+public String rejectBooking(@PathVariable String id) {
+    bookingService.updateStatus(id, Booking.STATUS_REJECTED);
+    return "redirect:/admin/bookings";
+}
+
+@GetMapping("/bookings/delete/{id}")
+public String deleteBooking(@PathVariable String id) {
+    bookingService.deleteBooking(id);
+    return "redirect:/admin/bookings";
 }
 
 @GetMapping("/customers")

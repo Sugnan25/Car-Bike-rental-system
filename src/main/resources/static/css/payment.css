@@ -18,6 +18,11 @@
         .page-header { margin-bottom: 35px; }
         .page-header h1 { font-size: 28px; font-weight: 700; margin-bottom: 6px; }
         .page-header p { color: #888; font-size: 14px; }
+        .approved-banner {
+            display: inline-block; margin-top: 14px; padding: 10px 18px;
+            background: rgba(16,185,129,0.12); border: 1px solid rgba(16,185,129,0.4);
+            color: #34d399; border-radius: 8px; font-size: 14px; font-weight: 600;
+        }
 
         .booking-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
 

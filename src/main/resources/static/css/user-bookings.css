@@ -11,41 +11,36 @@
         .nav-right { display: flex; gap: 12px; align-items: center; }
         .nav-link { color: #aaa; text-decoration: none; padding: 8px 16px; border-radius: 6px; font-size: 14px; transition: all 0.3s; }
         .nav-link:hover { color: #fff; background: rgba(255,255,255,0.08); }
-        .btn-back { background: rgba(0,210,255,0.1); border: 1px solid rgba(0,210,255,0.3); color: #00d2ff; }
-        .btn-back:hover { background: rgba(0,210,255,0.2); }
+        .btn-primary { background: rgba(0,210,255,0.1); border: 1px solid rgba(0,210,255,0.3); color: #00d2ff; }
+        .btn-primary:hover { background: rgba(0,210,255,0.2); }
+        .btn-home { background: transparent; border: 1px solid #2a2a4a; color: #aaa; }
+        .btn-home:hover { border-color: #fff; color: #fff; }
 
         .container { max-width: 1200px; margin: 0 auto; padding: 50px 30px; }
-        .page-header { margin-bottom: 35px; }
+        .page-header { margin-bottom: 30px; }
         .page-header h1 { font-size: 28px; font-weight: 700; margin-bottom: 6px; }
         .page-header p { color: #888; font-size: 14px; }
 
+        .alert {
+            padding: 14px 18px; border-radius: 10px; font-size: 14px; margin-bottom: 25px;
+        }
+        .alert-success {
+            background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.35); color: #34d399;
+        }
+
         .empty-state {
             background: #1a1a2e; border: 1px solid #2a2a4a; border-radius: 14px;
-            text-align: center; padding: 80px 20px; color: #555;
+            text-align: center; padding: 70px 20px;
         }
         .empty-state .icon { font-size: 60px; margin-bottom: 20px; display: block; }
-        .empty-state h3 { color: #888; font-size: 20px; margin-bottom: 10px; }
-        .empty-state p { font-size: 14px; }
-
-        .notif-badge {
-            background: rgba(239,68,68,0.15);
-            border: 1px solid rgba(239,68,68,0.4);
-            color: #ef4444;
-            font-size: 13px;
-            font-weight: 600;
-            padding: 6px 14px;
-            border-radius: 20px;
+        .empty-state h3 { color: #bbb; font-size: 20px; margin-bottom: 10px; }
+        .empty-state p { font-size: 14px; color: #666; margin-bottom: 25px; }
+        .btn-browse {
+            display: inline-block; padding: 12px 28px; border-radius: 8px; text-decoration: none;
+            background: linear-gradient(135deg, #00d2ff, #0090b3); color: #000; font-weight: 700; font-size: 14px;
+            transition: all 0.3s;
         }
-        .pending-banner {
-            background: rgba(251,146,60,0.1);
-            border: 1px solid rgba(251,146,60,0.35);
-            color: #fbbf24;
-            padding: 14px 18px;
-            border-radius: 10px;
-            font-size: 14px;
-            margin-bottom: 25px;
-        }
-        .pending-banner strong { color: #fff; }
+        .btn-browse:hover { box-shadow: 0 4px 20px rgba(0,210,255,0.3); transform: translateY(-1px); }
 
         .table-wrap {
             background: #1a1a2e; border: 1px solid #2a2a4a;
@@ -63,9 +58,8 @@
         }
         .bookings-table tbody tr:last-child td { border-bottom: none; }
         .bookings-table tbody tr:hover { background: rgba(255,255,255,0.02); }
-        .row-pending { background: rgba(251,146,60,0.04); }
-        .cell-strong { color: #fff; font-weight: 600; margin-bottom: 2px; }
-        .cell-sub { color: #777; font-size: 12px; }
+        .vehicle-name { color: #fff; font-weight: 600; margin-bottom: 2px; }
+        .vehicle-sub { color: #777; font-size: 12px; }
         .amount { color: #00d2ff; font-weight: 700; }
 
         .badge {
@@ -77,21 +71,24 @@
         .badge-paid { background: rgba(0,210,255,0.15); color: #00d2ff; border: 1px solid rgba(0,210,255,0.35); }
         .badge-rejected { background: rgba(239,68,68,0.15); color: #f87171; border: 1px solid rgba(239,68,68,0.35); }
 
-        .actions { display: flex; gap: 8px; }
-        .btn-accept, .btn-reject {
-            text-decoration: none; font-size: 13px; font-weight: 600;
-            padding: 7px 16px; border-radius: 8px; transition: all 0.3s;
-            white-space: nowrap;
+        .btn-action {
+            display: inline-block; text-decoration: none; font-size: 13px; font-weight: 600;
+            padding: 7px 16px; border-radius: 8px; transition: all 0.3s; white-space: nowrap;
         }
-        .btn-accept { background: rgba(16,185,129,0.15); color: #34d399; border: 1px solid rgba(16,185,129,0.4); }
-        .btn-accept:hover { background: rgba(16,185,129,0.3); }
-        .btn-reject { background: rgba(239,68,68,0.12); color: #f87171; border: 1px solid rgba(239,68,68,0.4); }
-        .btn-reject:hover { background: rgba(239,68,68,0.25); }
-        .btn-delete {
-            text-decoration: none; font-size: 13px; font-weight: 600;
-            padding: 7px 16px; border-radius: 8px; transition: all 0.3s;
-            white-space: nowrap; background: transparent; color: #666; border: 1px solid #2a2a4a;
-        }
+        .btn-pay-now { background: linear-gradient(135deg, #10b981, #059669); color: #fff; }
+        .btn-pay-now:hover { box-shadow: 0 4px 16px rgba(16,185,129,0.35); }
+        .btn-delete { background: transparent; border: 1px solid #2a2a4a; color: #888; }
         .btn-delete:hover { color: #f87171; border-color: rgba(239,68,68,0.5); }
+        .row-actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+        .action-note { color: #666; font-size: 13px; }
+        .action-ok { color: #34d399; }
+        .action-bad { color: #f87171; }
 
         .footer { text-align: center; padding: 30px; color: #444; font-size: 13px; border-top: 1px solid #1a1a2e; margin-top: 60px; }
+
+        @media (max-width: 768px) {
+            .navbar { padding: 0 20px; }
+            .container { padding: 30px 15px; }
+            .nav-right { gap: 6px; }
+            .nav-link { padding: 6px 10px; font-size: 13px; }
+        }

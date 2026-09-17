@@ -27,4 +27,22 @@ public class UserService {
 
         return repository.save(user);
     }
+
+    public User updateProfile(String email, String fullName, String phone, String newPassword) {
+
+        User user = repository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        if (fullName != null && !fullName.isBlank()) {
+            user.setFullName(fullName);
+        }
+        if (phone != null && !phone.isBlank()) {
+            user.setPhone(phone);
+        }
+        if (newPassword != null && !newPassword.isBlank()) {
+            user.setPassword(passwordEncoder.encode(newPassword));
+        }
+
+        return repository.save(user);
+    }
 }

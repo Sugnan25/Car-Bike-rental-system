@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Bookings</title>
+    <link rel="stylesheet" th:href="@{/css/user-bookings.css}">
+</head>
+<body>
+
+    <nav class="navbar">
+        <a href="/" class="navbar-brand">CARBIKE <span>Rental</span></a>
+        <div class="nav-right">
+            <a href="/user/dashboard" class="nav-link btn-home">Dashboard</a>
+            <a href="/" class="nav-link btn-home">Home</a>
+            <a href="/logout" class="nav-link btn-primary">Logout</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="page-header">
+            <h1>My Bookings</h1>
+            <p>Track the status of your rental requests and complete payment once approved.</p>
+        </div>
+
+        <div class="alert alert-success" th:if="${param.requested}">
+            &#9989; Your booking request has been sent. The admin will review it shortly.
+        </div>
+        <div class="alert alert-success" th:if="${param.paid}">
+            &#127881; Payment successful! Your booking is confirmed.
+        </div>
+        <div class="alert alert-success" th:if="${param.deleted}">
+            &#128465; Booking deleted successfully.
+        </div>
+
+        <div class="empty-state" th:if="${#lists.isEmpty(bookings)}">
+            <span class="icon">&#128197;</span>
+            <h3>No Bookings Yet</h3>
+            <p>You haven't booked any vehicles. Browse our fleet and make your first booking.</p>
+            <a href="/" class="btn-browse">Browse Vehicles</a>
+        </div>
+
+        <div class="table-wrap" th:unless="${#lists.isEmpty(bookings)}">
+            <table class="bookings-table">
+                <thead>
+                    <tr>
+                        <th>Vehicle</th>
+                        <th>Dates</th>
+                        <th>Est. KM</th>
+                        <th>Total</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="b : ${bookings}">
+                        <td>
+                            <div class="vehicle-name" th:text="${b.vehicleName}"></div>
+                            <div class="vehicle-sub" th:text="${b.vehicleNumber}"></div>
+                        </td>
+                        <td>
+                            <div th:text="${b.startDate} + ' to '"></div>
+                            <div th:text="${b.endDate}"></div>
+                        </td>
+                        <td th:text="${b.estimatedKm} + ' km'"></td>
+                        <td class="amount" th:text="'&#8377;' + ${#numbers.formatDecimal(b.totalAmount, 1, 0)}"></td>
+                        <td>
+                            <span class="badge badge-pending" th:if="${b.status == 'PENDING'}">Pending Approval</span>
+                            <span class="badge badge-accepted" th:if="${b.status == 'ACCEPTED'}">Approved</span>
+                            <span class="badge badge-paid" th:if="${b.status == 'PAID'}">Paid</span>
+                            <span class="badge badge-rejected" th:if="${b.status == 'REJECTED'}">Rejected</span>
+                        </td>
+                        <td>
+                            <div class="row-actions">
+                                <a th:if="${b.status == 'ACCEPTED'}"
+                                   th:href="@{/booking/pay/{id}(id=${b.id})}" class="btn-action btn-pay-now">Proceed to Pay</a>
+                                <span th:if="${b.status == 'PENDING'}" class="action-note">Awaiting approval</span>
+                                <span th:if="${b.status == 'PAID'}" class="action-note action-ok">&#10003; Confirmed</span>
+                                <span th:if="${b.status == 'REJECTED'}" class="action-note action-bad">Not approved</span>
+                                <a th:href="@{/user/bookings/delete/{id}(id=${b.id})}" class="btn-action btn-delete"
+                                   onclick="return confirm('Delete this booking? This cannot be undone.')">Delete</a>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="footer">&copy; 2026 Car &amp; Bike Rental. All rights reserved.</div>
+
+</body>
+</html>
