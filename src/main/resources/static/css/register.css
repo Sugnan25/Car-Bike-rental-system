@@ -125,3 +125,11 @@
             .left h1 { font-size: 30px; }
             .form-row { grid-template-columns: 1fr; }
         }
+
+        @media (max-width: 480px) {
+            .left { padding: 40px 20px 30px; }
+            .right { padding: 30px 20px; }
+            .left h1 { font-size: 25px; }
+            .left p { font-size: 14px; }
+            .btn-submit { width: 100%; }
+        }

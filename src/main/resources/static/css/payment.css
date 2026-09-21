@@ -120,3 +120,15 @@
             .booking-grid { grid-template-columns: 1fr; }
             .form-row { grid-template-columns: 1fr; }
         }
+
+        @media (max-width: 480px) {
+            .navbar { padding: 10px 14px; height: auto; min-height: 58px; flex-wrap: wrap; row-gap: 8px; }
+            .navbar-brand { font-size: 16px; }
+            .navbar-brand span { display: none; }
+            .nav-right { flex-wrap: wrap; justify-content: flex-end; gap: 6px; }
+            .nav-link { padding: 6px 10px; font-size: 12px; }
+            .container { padding: 22px 14px; }
+            .page-header h1 { font-size: 24px; }
+            .vehicle-summary, .payment-form { padding: 20px 16px; }
+            .btn-pay { padding: 14px; }
+        }

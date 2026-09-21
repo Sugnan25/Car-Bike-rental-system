@@ -231,3 +231,27 @@
             .stat-num { font-size: 24px; }
             .offers-banner { padding: 30px 20px; }
         }
+
+        @media (max-width: 480px) {
+            .nav { padding: 12px 16px; }
+            .nav-brand { font-size: 17px; }
+            .nav-links a { padding: 8px 12px; font-size: 13px; }
+            .hero { padding: 90px 16px 50px; }
+            .hero h1 { font-size: 27px; }
+            .hero p { font-size: 15px; margin-bottom: 30px; }
+            .hero-buttons { flex-direction: column; width: 100%; max-width: 320px; margin: 0 auto; }
+            .hero-buttons .btn { width: 100%; text-align: center; padding: 13px 28px; }
+            .hero-stats { flex-direction: column; gap: 22px; margin-top: 40px; }
+            .stat-num { font-size: 26px; }
+            .section-header h2 { font-size: 25px; }
+            .section-header p { font-size: 14px; }
+            .offer-card { padding: 20px 18px; }
+            .vehicle-body { padding: 18px 16px; }
+            .vehicle-actions { flex-direction: column; }
+            .btn-details { text-align: center; }
+            .feature-card { padding: 28px 20px; }
+            .deal-card { padding: 30px 22px; }
+            .cta-section h2 { font-size: 28px; }
+            .cta-section .btn { width: 100%; text-align: center; max-width: 320px; }
+            .footer { padding: 28px 16px; }
+        }

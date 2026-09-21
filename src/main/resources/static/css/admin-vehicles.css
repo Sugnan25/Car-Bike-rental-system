@@ -100,5 +100,18 @@
             .navbar { padding: 0 20px; }
             .container { padding: 30px 15px; }
             .header { flex-direction: column; gap: 15px; align-items: flex-start; }
-            .table-wrap { overflow-x: auto; }
+            .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+            .actions { flex-wrap: wrap; }
+        }
+
+        @media (max-width: 480px) {
+            .navbar { padding: 10px 14px; height: auto; min-height: 58px; flex-wrap: wrap; row-gap: 8px; }
+            .navbar-brand { font-size: 16px; }
+            .navbar-brand span { display: none; }
+            .nav-right { flex-wrap: wrap; justify-content: flex-end; gap: 6px; }
+            .nav-link { padding: 6px 10px; font-size: 12px; }
+            .container { padding: 22px 14px; }
+            .header h1 { font-size: 24px; }
+            .btn-add { width: 100%; justify-content: center; }
+            th, td { padding: 12px 14px; }
         }

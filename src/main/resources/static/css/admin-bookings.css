@@ -95,3 +95,24 @@
         .btn-delete:hover { color: #f87171; border-color: rgba(239,68,68,0.5); }
 
         .footer { text-align: center; padding: 30px; color: #444; font-size: 13px; border-top: 1px solid #1a1a2e; margin-top: 60px; }
+
+        @media (max-width: 768px) {
+            .navbar { padding: 0 20px; }
+            .container { padding: 30px 15px; }
+            .actions { flex-wrap: wrap; }
+            .notif-badge { display: block; width: fit-content; margin-bottom: 4px; }
+        }
+
+        @media (max-width: 480px) {
+            .navbar { padding: 10px 14px; height: auto; min-height: 58px; flex-wrap: wrap; row-gap: 8px; }
+            .navbar-brand { font-size: 16px; }
+            .navbar-brand span { display: none; }
+            .nav-right { flex-wrap: wrap; justify-content: flex-end; gap: 6px; }
+            .nav-link { padding: 6px 10px; font-size: 12px; }
+            .container { padding: 22px 14px; }
+            .page-header h1 { font-size: 24px; }
+            .bookings-table thead th, .bookings-table tbody td { padding: 12px 14px; }
+            .pending-banner { padding: 12px 14px; font-size: 13px; }
+            .actions { flex-direction: column; align-items: stretch; }
+            .actions .btn-accept, .actions .btn-reject, .actions .btn-delete { text-align: center; }
+        }
