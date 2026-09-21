@@ -255,3 +255,36 @@
             .cta-section .btn { width: 100%; text-align: center; max-width: 320px; }
             .footer { padding: 28px 16px; }
         }
+
+        /* ===== VEHICLE FILTERS ===== */
+        .vehicle-card.hidden { display: none !important; }
+        .filters {
+            max-width: 1200px; margin: 0 auto 30px; padding: 0 20px;
+            display: flex; flex-direction: column; gap: 14px;
+        }
+        .filter-tabs, .fuel-tabs { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+        .filter-label {
+            font-size: 12px; color: #888; text-transform: uppercase;
+            letter-spacing: 1px; padding-right: 4px;
+        }
+        .filter-btn {
+            padding: 10px 22px; border-radius: 50px; border: 1px solid #2a2a4a;
+            background: #1a1a2e; color: #aaa; font-size: 14px; font-weight: 600;
+            cursor: pointer; transition: all 0.3s;
+        }
+        .filter-btn:hover { border-color: #00d2ff; color: #fff; }
+        .filter-btn.active {
+            background: linear-gradient(135deg, #00d2ff, #0090b3);
+            color: #000; border-color: transparent;
+        }
+        .filter-btn.fuel-btn { padding: 8px 16px; font-size: 13px; background: transparent; color: #888; }
+        .filter-btn.fuel-btn.active {
+            background: rgba(16,185,129,0.15); color: #10b981;
+            border-color: rgba(16,185,129,0.5);
+        }
+
+        @media (max-width: 480px) {
+            .filters { padding: 0 16px; gap: 10px; }
+            .filter-btn { padding: 9px 16px; font-size: 13px; }
+            .filter-btn.fuel-btn { padding: 7px 12px; font-size: 12px; }
+        }

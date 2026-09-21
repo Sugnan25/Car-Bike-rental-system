@@ -82,12 +82,24 @@
             <p>Browse our collection of cars and bikes. Click "Proceed to Booking" to reserve yours.</p>
         </div>
 
+        <div class="filters" th:unless="${#lists.isEmpty(vehicles)}">
+            <div class="filter-tabs">
+                <span class="filter-label">Type</span>
+                <button type="button" class="filter-btn type-btn active" data-filter="all" onclick="filterVehicles('all')">All</button>
+                <button type="button" class="filter-btn type-btn" data-filter="CAR" onclick="filterVehicles('CAR')">Cars</button>
+                <button type="button" class="filter-btn type-btn" data-filter="BIKE" onclick="filterVehicles('BIKE')">Bikes</button>
+            </div>
+            <div class="fuel-tabs" id="fuelTabs">
+                <span class="filter-label">Fuel</span>
+            </div>
+        </div>
+
         <div class="empty-vehicles" th:if="${#lists.isEmpty(vehicles)}">
             <p>No vehicles available yet. Check back soon!</p>
         </div>
 
         <div class="vehicles-grid" th:unless="${#lists.isEmpty(vehicles)}">
-            <div class="vehicle-card" th:each="v : ${vehicles}">
+            <div class="vehicle-card" th:each="v : ${vehicles}" th:data-type="${v.type}" th:data-fuel="${v.fuelType}">
                 <div class="vehicle-img" th:if="${v.imageUrl == null or v.imageUrl.isEmpty()}">
                     <span th:utext="${v.type == 'CAR'} ? '&#128663;' : '&#128690;'"></span>
                 </div>
@@ -195,5 +207,6 @@
         &copy; 2026 Car &amp; Bike Rental. All rights reserved.
     </div>
 
+    <script th:src="@{/js/vehicle-filter.js}"></script>
 </body>
 </html>
