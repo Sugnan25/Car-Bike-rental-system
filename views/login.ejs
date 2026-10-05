@@ -5,44 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - Car &amp; Bike Rental</title>
     <link rel="stylesheet" href="/css/login.css">
-    <script>
-        // Check if previously logged in from localStorage to prevent re-login prompts
-        try {
-            var saved = localStorage.getItem('rental_auth_email');
-            if (saved && !window.location.search.includes('logout=true')) {
-                // Auto restore if available
-                var role = localStorage.getItem('rental_auth_role');
-                if (role === 'ROLE_ADMIN') {
-                    window.location.replace('/quick-login/admin');
-                } else if (saved) {
-                    window.location.replace('/quick-login/user');
-                }
-            }
-        } catch (e) {}
-    </script>
 </head>
 <body>
 
     <div class="left">
         <h1>Car &amp; Bike Rental</h1>
-        <p>Rent cars and bikes anytime, anywhere with zero security deposit and instant 2-minute approval.</p>
-        <div style="margin-top: 30px; display: flex; flex-direction: column; gap: 12px; font-size: 14px; color: #aaa;">
-            <div style="display:flex; align-items:center; gap:10px;">
-                <span style="color:#00d2ff; font-weight:bold;">&#10004;</span> 10% OFF on your very first ride (Code: FIRST10)
-            </div>
-            <div style="display:flex; align-items:center; gap:10px;">
-                <span style="color:#00d2ff; font-weight:bold;">&#10004;</span> Verified bikes and cars with 24/7 Roadside Assistance
-            </div>
-            <div style="display:flex; align-items:center; gap:10px;">
-                <span style="color:#00d2ff; font-weight:bold;">&#10004;</span> Transparent per-km pricing with zero hidden costs
-            </div>
-        </div>
+        <p>Access your account to manage bookings, view history, and rent vehicles instantly.</p>
     </div>
 
     <div class="right">
         <div class="form-box">
             <h2>Welcome Back</h2>
-            <p class="subtitle">Please enter your credentials to login</p>
+            <p class="subtitle">Sign in to continue to your dashboard</p>
 
             <% if (error) { %>
                 <div style="background: rgba(239,68,68,0.15); color: #ef4444; border: 1px solid #ef4444; padding: 10px 14px; border-radius: 8px; margin-bottom: 18px; font-size: 13px;">
@@ -56,31 +30,16 @@
                 </div>
             <% } %>
 
-            <!-- Quick 1-Click Login (prevents having to re-type in iframes) -->
-            <div style="background: rgba(0, 210, 255, 0.08); border: 1px solid rgba(0, 210, 255, 0.25); border-radius: 10px; padding: 12px 14px; margin-bottom: 20px;">
-                <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: #00d2ff; font-weight: 700; margin-bottom: 8px;">
-                    1-Click Instant Login (Saved Credentials)
-                </div>
-                <div style="display: flex; gap: 8px;">
-                    <a href="/quick-login/user" style="flex: 1; text-align: center; background: #00d2ff; color: #000; padding: 8px 10px; border-radius: 6px; font-size: 12px; font-weight: 700; text-decoration: none;" onclick="persistUser('user@gmail.com', 'ROLE_USER')">
-                        Login as Rider
-                    </a>
-                    <a href="/quick-login/admin" style="flex: 1; text-align: center; background: #1a1a2e; border: 1px solid #2a2a4a; color: #fff; padding: 8px 10px; border-radius: 6px; font-size: 12px; font-weight: 600; text-decoration: none;" onclick="persistUser('admin@gmail.com', 'ROLE_ADMIN')">
-                        Login as Admin
-                    </a>
-                </div>
-            </div>
-
-            <form action="/login" method="post" onsubmit="handleLoginSubmit()">
+            <form action="/login" method="post">
                 <div class="form-group">
                     <label>Email Address</label>
-                    <input type="email" id="loginEmail" name="username" placeholder="rider@email.com" value="user@gmail.com" required>
+                    <input type="email" name="username" placeholder="Enter your email" required>
                 </div>
 
                 <div class="form-group">
                     <label>Password</label>
                     <div class="password-field">
-                        <input type="password" id="password" name="password" placeholder="Enter password" value="user123" required>
+                        <input type="password" id="password" name="password" placeholder="Enter your password" required>
                         <button type="button" class="toggle-password" aria-label="Show password"
                                 onclick="togglePassword('password', this)">
                             <svg class="eye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
@@ -101,7 +60,7 @@
             </form>
 
             <div class="form-footer">
-                Don't have an account? <a href="/register">Register here</a>
+                Don't have an account? <a href="/register">Create One</a>
                 <br><br>
                 <a href="/" style="color: #888; font-size: 13px;">&larr; Back to Home</a>
             </div>
@@ -109,18 +68,5 @@
     </div>
 
     <script src="/js/password-toggle.js"></script>
-    <script>
-        function persistUser(email, role) {
-            try {
-                localStorage.setItem('rental_auth_email', email);
-                localStorage.setItem('rental_auth_role', role);
-            } catch (e) {}
-        }
-        function handleLoginSubmit() {
-            var email = document.getElementById('loginEmail').value;
-            var role = email.toLowerCase().includes('admin') ? 'ROLE_ADMIN' : 'ROLE_USER';
-            persistUser(email, role);
-        }
-    </script>
 </body>
 </html>
