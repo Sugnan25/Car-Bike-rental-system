@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Car &amp; Bike Rental - Ride Your Dream</title>
+    <link rel="stylesheet" href="/css/index.css">
+</head>
+<body>
+
+    <!-- NAVBAR -->
+    <nav class="nav">
+        <a href="/" class="nav-brand">CARBIKE RENTAL</a>
+        
+        <div class="nav-links">
+            <% if (!user) { %>
+                <a href="/login" class="btn-nav-login">Login</a>
+                <a href="/register" class="btn-nav-register">Register</a>
+            <% } else { %>
+                <span class="user-welcome" style="color: white; margin-right: 10px;">
+                    Hi, <%= user.fullName || user.email %>!
+                </span>
+                
+                <% if (user.role === 'ROLE_ADMIN') { %>
+                    <a href="/admin/dashboard" class="btn-nav-login">Admin Panel</a>
+                <% } else { %>
+                    <a href="/user/dashboard" class="btn-nav-login">My Dashboard</a>
+                <% } %>
+                
+                <form action="/logout" method="post" style="display: inline;">
+                    <button type="submit" class="btn-nav-register" style="background: transparent; border: 1px solid white; color: white; cursor: pointer; padding: 8px 18px; border-radius: 8px;">Logout</button>
+                </form>
+            <% } %>
+        </div>
+    </nav>
+
+    <!-- HERO -->
+    <div class="hero">
+        <div class="hero-content">
+            <span class="hero-badge">&#127775; Limited Time Offer - 20% OFF on First Ride</span>
+            <h1>Ride Your Dream,<br>Rent with Ease</h1>
+            <p>Book premium cars and bikes at unbeatable prices. Flexible plans, zero hidden charges, and a fleet of 50+ vehicles waiting for you.</p>
+            <div class="hero-buttons">
+                <% if (!user) { %>
+                    <a href="/register" class="btn btn-primary">Get Started Free</a>
+                <% } else { %>
+                    <a href="/user/dashboard" class="btn btn-primary">Go to Dashboard</a>
+                <% } %>
+                <a href="#vehicles" class="btn btn-outline">Browse Vehicles</a>
+            </div>
+            <div class="hero-stats">
+                <div class="stat">
+                    <div class="stat-num">50+</div>
+                    <div class="stat-label">Vehicles</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-num">500+</div>
+                    <div class="stat-label">Happy Riders</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-num">4.8&#9733;</div>
+                    <div class="stat-label">Rating</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- OFFERS BANNER -->
+    <div class="offers-banner">
+        <div class="offers-grid">
+            <div class="offer-card">
+                <div class="offer-icon">&#128663;</div>
+                <div class="offer-text">
+                    <h3>Weekend Special</h3>
+                    <p>Rent any car this Saturday &amp; Sunday at flat 30% off.</p>
+                    <span class="offer-tag">VALID TILL SUNDAY</span>
+                </div>
+            </div>
+            <div class="offer-card">
+                <div class="offer-icon">&#128176;</div>
+                <div class="offer-text">
+                    <h3>First Ride Free</h3>
+                    <p>New users get their first bike ride free up to 10 km.</p>
+                    <span class="offer-tag">NEW USERS</span>
+                </div>
+            </div>
+            <div class="offer-card">
+                <div class="offer-icon">&#127873;</div>
+                <div class="offer-text">
+                    <h3>Refer &amp; Earn</h3>
+                    <p>Refer a friend and both get &#8377;200 rental credit.</p>
+                    <span class="offer-tag">EARN &#8377;200</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- VEHICLES -->
+    <section class="vehicles-section" id="vehicles">
+        <div class="section-header">
+            <div class="badge">Our Fleet</div>
+            <h2>Available Vehicles</h2>
+            <p>Browse our collection of cars and bikes. Click "Proceed to Booking" to reserve yours.</p>
+        </div>
+
+        <% if (vehicles && vehicles.length > 0) { %>
+            <div class="filters">
+                <div class="filter-tabs">
+                    <span class="filter-label">Type</span>
+                    <button type="button" class="filter-btn type-btn active" data-filter="all" onclick="filterVehicles('all')">All</button>
+                    <button type="button" class="filter-btn type-btn" data-filter="CAR" onclick="filterVehicles('CAR')">Cars</button>
+                    <button type="button" class="filter-btn type-btn" data-filter="BIKE" onclick="filterVehicles('BIKE')">Bikes</button>
+                </div>
+                <div class="fuel-tabs" id="fuelTabs">
+                    <span class="filter-label">Fuel</span>
+                </div>
+            </div>
+
+            <div class="vehicles-grid">
+                <% vehicles.forEach(function(v) { %>
+                    <div class="vehicle-card" data-type="<%= v.type %>" data-fuel="<%= v.fuelType %>">
+                        <div class="vehicle-img" style="<%= (v.imageUrl) ? 'padding:0;' : '' %>">
+                            <% if (v.imageUrl) { %>
+                                <img src="<%= v.imageUrl %>" alt="<%= v.company %> <%= v.model %>" style="width:100%;height:190px;object-fit:cover;">
+                            <% } else { %>
+                                <span><%- v.type === 'CAR' ? '&#128663;' : '&#128690;' %></span>
+                            <% } %>
+                        </div>
+                        <div class="vehicle-body">
+                            <span class="vehicle-type <%= v.type === 'CAR' ? 'type-car' : 'type-bike' %>">
+                                <%= v.type %>
+                            </span>
+                            <h3><%= v.model %></h3>
+                            <div class="vehicle-company"><%= v.company %></div>
+                            <div class="vehicle-details">
+                                <span class="vehicle-detail">&#9981; <span><%= v.fuelType %></span></span>
+                                <span class="vehicle-detail">&#128101; <span><%= v.seatingCapacity %></span> Seats</span>
+                                <% if (v.vehicleNumber) { %>
+                                    <span class="vehicle-detail">&#128203; <span><%= v.vehicleNumber %></span></span>
+                                <% } %>
+                            </div>
+                            <div class="vehicle-price">
+                                <% if (v.pricePerKm != null) { %>
+                                    <span class="price">&#8377;<%= Math.round(v.pricePerKm) %></span>
+                                    <span class="per">/ km</span>
+                                <% } else { %>
+                                    <span class="price">Price on request</span>
+                                <% } %>
+                            </div>
+                            <div class="vehicle-actions">
+                                <% if (user) { %>
+                                    <a href="/booking/<%= v.id %>" class="btn-billing">Proceed to Booking</a>
+                                <% } else { %>
+                                    <a href="/login" class="btn-billing">Login to Book</a>
+                                <% } %>
+                            </div>
+                        </div>
+                    </div>
+                <% }); %>
+            </div>
+        <% } else { %>
+            <div class="empty-vehicles">
+                <p>No vehicles available yet. Check back soon!</p>
+            </div>
+        <% } %>
+    </section>
+
+    <!-- FEATURES -->
+    <section class="features-section">
+        <div class="section-header">
+            <div class="badge">Why Us</div>
+            <h2>Why Choose CarBike Rental?</h2>
+            <p>We make renting vehicles simple, affordable, and reliable.</p>
+        </div>
+        <div class="features-grid">
+            <div class="feature-card">
+                <span class="feature-icon">&#128663;</span>
+                <h3>Premium Fleet</h3>
+                <p>Well-maintained cars and bikes from top brands, ready for you.</p>
+            </div>
+            <div class="feature-card">
+                <span class="feature-icon">&#128176;</span>
+                <h3>Transparent Pricing</h3>
+                <p>No hidden fees. What you see is what you pay, every time.</p>
+            </div>
+            <div class="feature-card">
+                <span class="feature-icon">&#9889;</span>
+                <h3>Instant Booking</h3>
+                <p>Book in seconds. No paperwork, no waiting, no hassle.</p>
+            </div>
+            <div class="feature-card">
+                <span class="feature-icon">&#128737;</span>
+                <h3>24/7 Support</h3>
+                <p>Round-the-clock customer support for a smooth experience.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- DEALS -->
+    <section class="deals-section">
+        <div class="section-header">
+            <div class="badge">&#128293; Hot Deals</div>
+            <h2>Special Rental Packages</h2>
+            <p>Grab our limited-time deals and save more on your next ride.</p>
+        </div>
+        <div class="deals-grid">
+            <div class="deal-card">
+                <span class="deal-tag">SAVE 25%</span>
+                <h3>Weekday Saver</h3>
+                <p>Mon - Fri car rental package. Perfect for daily commuters and office goers.</p>
+                <div class="deal-price">&#8377;899 <span>/ day</span></div>
+            </div>
+            <div class="deal-card">
+                <span class="deal-tag">POPULAR</span>
+                <h3>Bike Explorer</h3>
+                <p>Weekend bike rental for adventure seekers. Includes helmet and basic insurance.</p>
+                <div class="deal-price">&#8377;299 <span>/ day</span></div>
+            </div>
+            <div class="deal-card">
+                <span class="deal-tag">BEST VALUE</span>
+                <h3>Monthly Pass</h3>
+                <p>30-day unlimited car access. Best for long-term needs and families.</p>
+                <div class="deal-price">&#8377;14,999 <span>/ month</span></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- USER REVIEWS / FEEDBACKS PREVIEW -->
+    <% if (feedbacks && feedbacks.length > 0) { %>
+    <section class="features-section" style="background:#12121e; border-top:1px solid #2a2a4a;">
+        <div class="section-header">
+            <div class="badge">&#11088; Rider Stories</div>
+            <h2>What Our Riders Say</h2>
+            <p>Real feedback from customers who rented with CarBike Rental.</p>
+        </div>
+        <div class="features-grid">
+            <% feedbacks.slice(0, 3).forEach(function(fb) { %>
+                <div class="feature-card" style="text-align:left; border-color: rgba(0,210,255,0.2);">
+                    <div style="color:#f59e0b; margin-bottom:10px; font-size:18px;">
+                        <% for (let i = 0; i < fb.rating; i++) { %>&#9733;<% } %>
+                    </div>
+                    <p style="color:#ddd; font-style:italic; margin-bottom:15px; font-size:14px; line-height:1.6;">"<%= fb.comments %>"</p>
+                    <div style="font-weight:600; color:#00d2ff; font-size:13px;"><%= fb.userName %></div>
+                    <div style="color:#777; font-size:11px;"><%= fb.category %> &bull; <%= new Date(fb.createdAt).toLocaleDateString() %></div>
+                </div>
+            <% }); %>
+        </div>
+    </section>
+    <% } %>
+
+    <!-- CTA -->
+    <section class="cta-section">
+        <h2>Ready to Ride?</h2>
+        <p>Join hundreds of happy riders. Register now and get 20% off on your first booking.</p>
+        <div class="hero-buttons" style="justify-content:center;">
+            <% if (!user) { %>
+                <a href="/register" class="btn btn-primary">Register Now</a>
+                <a href="/login" class="btn btn-outline">Login to Book</a>
+            <% } else { %>
+                <a href="/user/dashboard" class="btn btn-primary">Go to My Dashboard</a>
+            <% } %>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <div class="footer">
+        &copy; 2026 Car &amp; Bike Rental. All rights reserved.
+    </div>
+
+    <script src="/js/vehicle-filter.js"></script>
+</body>
+</html>

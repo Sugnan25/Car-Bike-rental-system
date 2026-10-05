@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Car &amp; Bike Rental</title>
+    <link rel="stylesheet" href="/css/admin-dashboard.css">
+</head>
+<body>
+
+    <nav class="navbar">
+        <a href="/admin" class="navbar-brand">CARBIKE <span>Admin</span></a>
+        <div class="nav-right">
+            <a href="/" class="nav-link btn-home">Back to Website</a>
+            <form action="/logout" method="post" style="display:inline;">
+                <button type="submit" class="nav-link btn-primary" style="border:none; cursor:pointer; background:none; font:inherit; color:#ef4444;">Logout</button>
+            </form>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="welcome">
+            <h2>Welcome, Admin</h2>
+            <p>Manage your car and bike rental system from here.</p>
+        </div>
+
+        <div class="cards">
+            <div class="card">
+                <div class="card-icon icon-blue">&#128663;</div>
+                <h3>Manage Vehicles</h3>
+                <p>Add, edit and delete cars and bikes from the fleet.</p>
+                <a href="/admin/vehicles" class="card-link">Manage Vehicles &#8594;</a>
+            </div>
+
+            <div class="card">
+                <div class="card-icon icon-green">&#10133;</div>
+                <h3>Add Vehicle</h3>
+                <p>Add a new car or bike to the rental system.</p>
+                <a href="/admin/vehicles/add" class="card-link">Add Vehicle &#8594;</a>
+            </div>
+
+            <div class="card">
+                <div class="card-icon icon-purple">&#128100;</div>
+                <h3>Users</h3>
+                <p>View all registered users and their details.</p>
+                <a href="/admin/users" class="card-link">View Users &#8594;</a>
+            </div>
+
+            <div class="card">
+                <div class="card-icon icon-orange">&#128197;</div>
+                <% if (pendingBookings > 0) { %>
+                    <span class="pending-dot" style="background:#ef4444; color:#fff; padding:3px 10px; border-radius:12px; font-size:12px; font-weight:700;">
+                        <%= pendingBookings %> new
+                    </span>
+                <% } %>
+                <h3>Bookings</h3>
+                <p>View and manage customer bookings.</p>
+                <a href="/admin/bookings" class="card-link">Manage Bookings &#8594;</a>
+            </div>
+
+            <div class="card">
+                <div class="card-icon icon-blue">&#128172;</div>
+                <h3>Customer Feedback</h3>
+                <p>Read rider reviews and ratings submitted by users.</p>
+                <a href="/admin/feedbacks" class="card-link">View Feedback &#8594;</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        &copy; 2026 Car &amp; Bike Rental Admin Panel
+    </div>
+
+</body>
+</html>

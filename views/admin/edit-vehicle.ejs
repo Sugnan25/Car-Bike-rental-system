@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Vehicle - Admin</title>
+    <link rel="stylesheet" href="/css/admin-edit-vehicle.css">
+</head>
+<body>
+
+    <nav class="navbar">
+        <a href="/admin" class="navbar-brand">CARBIKE <span>Admin</span></a>
+        <div class="nav-right">
+            <a href="/admin/vehicles" class="nav-link btn-back">Back to Vehicles</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="page-header">
+            <h1>Edit Vehicle</h1>
+            <p>Update the vehicle details below.</p>
+        </div>
+
+        <div class="form-card">
+            <form action="/admin/vehicles/update" method="post" enctype="multipart/form-data">
+
+                <input type="hidden" name="id" value="<%= vehicle.id %>">
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Vehicle Type</label>
+                        <select name="type" required>
+                            <option value="CAR" <%= vehicle.type === 'CAR' ? 'selected' : '' %>>Car</option>
+                            <option value="BIKE" <%= vehicle.type === 'BIKE' ? 'selected' : '' %>>Bike</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Fuel Type</label>
+                        <select name="fuelType">
+                            <option value="PETROL" <%= vehicle.fuelType === 'PETROL' ? 'selected' : '' %>>Petrol</option>
+                            <option value="DIESEL" <%= vehicle.fuelType === 'DIESEL' ? 'selected' : '' %>>Diesel</option>
+                            <option value="ELECTRIC" <%= vehicle.fuelType === 'ELECTRIC' ? 'selected' : '' %>>Electric</option>
+                            <option value="HYBRID" <%= vehicle.fuelType === 'HYBRID' ? 'selected' : '' %>>Hybrid</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Company</label>
+                        <input type="text" name="company" value="<%= vehicle.company %>" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Model</label>
+                        <input type="text" name="model" value="<%= vehicle.model %>" required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Vehicle Number</label>
+                        <input type="text" name="vehicleNumber" value="<%= vehicle.vehicleNumber %>" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Seating Capacity</label>
+                        <input type="number" name="seatingCapacity" value="<%= vehicle.seatingCapacity %>" required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Price Per KM (&#8377;)</label>
+                        <input type="number" step="0.01" name="pricePerKm" value="<%= vehicle.pricePerKm %>" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Available</label>
+                        <select name="available">
+                            <option value="true" <%= vehicle.available ? 'selected' : '' %>>Yes</option>
+                            <option value="false" <%= !vehicle.available ? 'selected' : '' %>>No</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group form-full">
+                    <label>Vehicle Photo URL</label>
+                    <input type="text" name="imageUrl" value="<%= vehicle.imageUrl || '' %>" placeholder="https://... or upload below" style="margin-bottom: 10px;">
+                    
+                    <% if (vehicle.imageUrl) { %>
+                        <div class="current-image">
+                            <div class="label">Current Photo</div>
+                            <img src="<%= vehicle.imageUrl %>" alt="Current vehicle photo" style="max-height:120px; border-radius:8px; margin-bottom:10px;">
+                        </div>
+                    <% } %>
+
+                    <div class="file-upload">
+                        <input type="file" name="imageFile" accept="image/*" onchange="previewImage(this)">
+                        <span class="file-upload-icon">&#128247;</span>
+                        <span class="file-upload-text">Upload new photo or <strong>browse</strong></span>
+                    </div>
+                    <div class="file-preview" id="filePreview">
+                        <img id="previewImg" alt="Preview">
+                        <div class="file-name" id="fileName"></div>
+                    </div>
+                </div>
+
+                <div class="form-group form-full">
+                    <label>Description</label>
+                    <textarea name="description"><%= vehicle.description || '' %></textarea>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn-submit">Update Vehicle</button>
+                    <a href="/admin/vehicles" class="btn-cancel">Cancel</a>
+                </div>
+
+            </form>
+        </div>
+    </div>
+
+    <div class="footer">&copy; 2026 Car &amp; Bike Rental Admin Panel</div>
+
+    <script>
+        function previewImage(input) {
+            var file = input.files[0];
+            if (file) {
+                var reader = new FileReader();
+                var preview = document.getElementById('filePreview');
+                var img = document.getElementById('previewImg');
+                var name = document.getElementById('fileName');
+                reader.onload = function(e) {
+                    img.src = e.target.result;
+                    preview.style.display = 'block';
+                    name.textContent = file.name;
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+    </script>
+
+</body>
+</html>

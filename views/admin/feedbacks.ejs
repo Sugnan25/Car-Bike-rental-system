@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Feedbacks - Admin</title>
+    <link rel="stylesheet" href="/css/admin-users.css">
+</head>
+<body>
+
+    <nav class="navbar">
+        <a href="/admin" class="navbar-brand">CARBIKE <span>Admin</span></a>
+        <div class="nav-right">
+            <a href="/admin/dashboard" class="nav-link btn-back">Dashboard</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="header">
+            <h1>Customer Reviews &amp; Feedback</h1>
+        </div>
+
+        <% if (!feedbacks || feedbacks.length === 0) { %>
+            <div class="table-wrap">
+                <div class="empty-state">
+                    <p>No feedback received yet.</p>
+                </div>
+            </div>
+        <% } else { %>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Customer</th>
+                            <th>Rating</th>
+                            <th>Category</th>
+                            <th>Comments</th>
+                            <th>Date</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% feedbacks.forEach(function(fb) { %>
+                            <tr>
+                                <td>
+                                    <strong><%= fb.userName %></strong>
+                                    <div style="font-size:12px; color:#888;"><%= fb.userEmail %></div>
+                                </td>
+                                <td>
+                                    <span style="color: #f59e0b; font-size:15px;">
+                                        <% for (let i = 0; i < fb.rating; i++) { %>&#9733;<% } %>
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="badge badge-admin"><%= fb.category %></span>
+                                </td>
+                                <td style="max-width:320px; line-height:1.4;"><%= fb.comments %></td>
+                                <td style="font-size:12px; color:#888;"><%= new Date(fb.createdAt).toLocaleDateString() %></td>
+                                <td>
+                                    <a href="/admin/feedbacks/delete/<%= fb.id %>" class="btn-delete"
+                                       onclick="return confirm('Delete this feedback entry?')">Delete</a>
+                                </td>
+                            </tr>
+                        <% }); %>
+                    </tbody>
+                </table>
+            </div>
+        <% } %>
+    </div>
+
+    <div class="footer">&copy; 2026 Car &amp; Bike Rental Admin Panel</div>
+
+</body>
+</html>

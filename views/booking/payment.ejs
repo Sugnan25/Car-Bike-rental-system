@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book Vehicle - Car &amp; Bike Rental</title>
+    <link rel="stylesheet" href="/css/payment.css">
+</head>
+<body>
+
+    <nav class="navbar">
+        <a href="/" class="navbar-brand">CARBIKE <span>Rental</span></a>
+        <div class="nav-right">
+            <a href="/user/dashboard" class="nav-link btn-home">Dashboard</a>
+            <a href="/" class="nav-link btn-home">Back to Vehicles</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="page-header">
+            <h1>Book Vehicle</h1>
+            <p>Select your dates and estimated KM, then send your booking request for approval.</p>
+            <% if (isFirstRide) { %>
+                <div style="background: rgba(16,185,129,0.15); border: 1px solid #10b981; color: #10b981; padding: 12px 18px; border-radius: 10px; margin-top: 15px; font-weight: 600; display: inline-flex; align-items: center; gap: 8px;">
+                    <span>&#127881;</span>
+                    <span>New Rider Welcome Offer: <strong>10% OFF</strong> automatically applied to this booking!</span>
+                </div>
+            <% } %>
+        </div>
+
+        <div class="booking-grid">
+            <!-- Vehicle Summary -->
+            <div class="vehicle-summary">
+                <h3>Vehicle Details</h3>
+
+                <div class="summary-img" style="<%= (vehicle.imageUrl) ? 'padding:0;' : '' %>">
+                    <% if (vehicle.imageUrl) { %>
+                        <img src="<%= vehicle.imageUrl %>" alt="<%= vehicle.company %> <%= vehicle.model %>">
+                    <% } else { %>
+                        <span><%- vehicle.type === 'CAR' ? '&#128663;' : '&#128690;' %></span>
+                    <% } %>
+                </div>
+
+                <div class="summary-row">
+                    <span class="summary-label">Vehicle</span>
+                    <span class="summary-value"><%= vehicle.company %> <%= vehicle.model %></span>
+                </div>
+                <div class="summary-row">
+                    <span class="summary-label">Type</span>
+                    <span class="summary-value"><%= vehicle.type %></span>
+                </div>
+                <div class="summary-row">
+                    <span class="summary-label">Fuel</span>
+                    <span class="summary-value"><%= vehicle.fuelType %></span>
+                </div>
+                <div class="summary-row">
+                    <span class="summary-label">Seats</span>
+                    <span class="summary-value"><%= vehicle.seatingCapacity %> Seats</span>
+                </div>
+                <div class="summary-row">
+                    <span class="summary-label">Price Per KM</span>
+                    <span class="summary-value"><%= vehicle.pricePerKm != null ? '₹' + Math.round(vehicle.pricePerKm) + ' / km' : 'TBD' %></span>
+                </div>
+
+                <!-- Live Price Breakdown -->
+                <div class="price-breakdown" id="priceBreakdown">
+                    <h4>&#128176; Price Breakdown</h4>
+                    <div class="breakdown-row">
+                        <span>Rate per KM</span>
+                        <span id="ratePerKm"><%= vehicle.pricePerKm != null ? '₹' + Math.round(vehicle.pricePerKm) : '₹0' %></span>
+                    </div>
+                    <div class="breakdown-row">
+                        <span>Estimated KM</span>
+                        <span id="displayKm">0 km</span>
+                    </div>
+                    <div class="breakdown-row">
+                        <span>Estimated Days</span>
+                        <span id="displayDays">0 days</span>
+                    </div>
+                    <div class="breakdown-row">
+                        <span>Subtotal</span>
+                        <span id="displaySubtotal">&#8377;0</span>
+                    </div>
+                    <div class="breakdown-row" id="discountRow" style="color: #10b981; display: none;">
+                        <span>First Ride 10% Discount</span>
+                        <span id="displayDiscount">-&#8377;0</span>
+                    </div>
+                    <div class="breakdown-row total">
+                        <span>Total Payable</span>
+                        <span class="total-price" id="totalAmount">&#8377;0</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Booking Request Form -->
+            <div class="payment-form">
+                <h3>Booking Details</h3>
+
+                <form action="/booking/<%= vehicle.id %>" method="post" id="bookingForm">
+
+                    <div class="form-group">
+                        <label>Booking For</label>
+                        <input type="text" value="<%= user ? user.fullName : '' %>" readonly style="color:#00d2ff; font-weight:600;">
+                    </div>
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="text" value="<%= user ? user.email : '' %>" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label>Phone</label>
+                        <input type="text" value="<%= user ? user.phone : '' %>" readonly>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>&#128197; Start Date</label>
+                            <input type="date" id="startDate" name="startDate" required onchange="calculateTotal()">
+                        </div>
+                        <div class="form-group">
+                            <label>&#128197; End Date</label>
+                            <input type="date" id="endDate" name="endDate" required onchange="calculateTotal()">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>&#128207; Estimated Kilometers</label>
+                        <input type="number" id="estimatedKm" name="estimatedKm" placeholder="e.g. 150" min="1" required oninput="calculateTotal()">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Promo Code</label>
+                        <div style="display: flex; gap: 8px;">
+                            <input type="text" id="promoCode" name="promoCode" value="<%= isFirstRide ? 'FIRST10' : '' %>" placeholder="Enter coupon code (e.g. FIRST10)" style="flex:1; text-transform:uppercase;" oninput="calculateTotal()">
+                            <button type="button" onclick="applyPromo()" style="padding: 10px 16px; background: rgba(0,210,255,0.15); border: 1px solid #00d2ff; color: #00d2ff; border-radius: 8px; font-weight: 700; cursor: pointer;">Apply</button>
+                        </div>
+                        <small id="promoMsg" style="display: block; margin-top: 5px; color: #10b981; font-size: 12px;"></small>
+                    </div>
+
+                    <button type="submit" class="btn-pay" id="bookBtn">
+                        Book Now
+                    </button>
+
+                    <div class="secure-note">&#9989; Your request will be sent to the admin for approval. You can pay once it is accepted.</div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">&copy; 2026 Car &amp; Bike Rental. All rights reserved.</div>
+
+    <script>
+        var pricePerKm = <%= vehicle.pricePerKm || 0 %>;
+        var isEligibleFirstRide = <%= isFirstRide ? 'true' : 'false' %>;
+
+        function applyPromo() {
+            var promo = (document.getElementById('promoCode').value || '').trim().toUpperCase();
+            var msg = document.getElementById('promoMsg');
+            if (promo === 'FIRST10' || isEligibleFirstRide) {
+                msg.textContent = '✓ 10% First Ride Discount applied successfully!';
+                msg.style.color = '#10b981';
+            } else if (promo) {
+                msg.textContent = 'Invalid promo code. Use FIRST10 for 10% off.';
+                msg.style.color = '#ef4444';
+            }
+            calculateTotal();
+        }
+
+        function calculateTotal() {
+            var startDate = document.getElementById('startDate').value;
+            var endDate = document.getElementById('endDate').value;
+            var km = parseFloat(document.getElementById('estimatedKm').value) || 0;
+            var promo = (document.getElementById('promoCode').value || '').trim().toUpperCase();
+
+            var days = 0;
+            if (startDate && endDate) {
+                var start = new Date(startDate);
+                var end = new Date(endDate);
+                var diff = Math.ceil((end - start) / (1000 * 60 * 60 * 24));
+                days = diff > 0 ? diff : 0;
+            }
+
+            var subtotal = (pricePerKm || 0) * km;
+            var has10Off = isEligibleFirstRide || promo === 'FIRST10';
+            var discount = has10Off ? Math.round(subtotal * 0.10) : 0;
+            var total = Math.max(0, subtotal - discount);
+
+            document.getElementById('displayKm').textContent = km + ' km';
+            document.getElementById('displayDays').textContent = days + ' days';
+            document.getElementById('displaySubtotal').textContent = '₹' + Math.round(subtotal).toLocaleString('en-IN');
+
+            var discountRow = document.getElementById('discountRow');
+            if (has10Off && discount > 0) {
+                discountRow.style.display = 'flex';
+                document.getElementById('displayDiscount').textContent = '-₹' + discount.toLocaleString('en-IN');
+            } else {
+                discountRow.style.display = 'none';
+            }
+
+            document.getElementById('totalAmount').textContent = '₹' + Math.round(total).toLocaleString('en-IN');
+        }
+
+        // Set min dates to today
+        var today = new Date().toISOString().split('T')[0];
+        document.getElementById('startDate').setAttribute('min', today);
+        document.getElementById('endDate').setAttribute('min', today);
+
+        if (isEligibleFirstRide) {
+            document.getElementById('promoMsg').textContent = '✓ 10% First Ride Discount applied automatically!';
+        }
+    </script>
+</body>
+</html>

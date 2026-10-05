@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Bookings - Admin</title>
+    <link rel="stylesheet" href="/css/admin-bookings.css">
+</head>
+<body>
+
+    <nav class="navbar">
+        <a href="/admin" class="navbar-brand">CARBIKE <span>Admin</span></a>
+        <div class="nav-right">
+            <% if (pendingCount > 0) { %>
+                <span class="notif-badge">
+                    &#128276; <%= pendingCount %> pending
+                </span>
+            <% } %>
+            <a href="/admin/dashboard" class="nav-link btn-back">Dashboard</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="page-header">
+            <h1>Bookings</h1>
+            <p>Review customer booking requests and accept or reject them.</p>
+        </div>
+
+        <% if (pendingCount > 0) { %>
+            <div class="pending-banner">
+                &#128276; You have <strong><%= pendingCount %></strong>
+                <%= pendingCount === 1 ? 'pending booking request' : 'pending booking requests' %>
+                waiting for approval.
+            </div>
+        <% } %>
+
+        <% if (!bookings || bookings.length === 0) { %>
+            <div class="empty-state">
+                <span class="icon">&#128197;</span>
+                <h3>No Bookings Yet</h3>
+                <p>Bookings will appear here once customers start renting vehicles.</p>
+            </div>
+        <% } else { %>
+            <div class="table-wrap">
+                <table class="bookings-table">
+                    <thead>
+                        <tr>
+                            <th>Customer</th>
+                            <th>Vehicle</th>
+                            <th>Dates</th>
+                            <th>Est. KM</th>
+                            <th>Total</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% bookings.forEach(function(b) { %>
+                            <tr class="<%= b.status === 'PENDING' ? 'row-pending' : '' %>">
+                                <td>
+                                    <div class="cell-strong"><%= b.userName %></div>
+                                    <div class="cell-sub"><%= b.userEmail %></div>
+                                    <div class="cell-sub"><%= b.userPhone || '' %></div>
+                                </td>
+                                <td>
+                                    <div class="cell-strong"><%= b.vehicleName %></div>
+                                    <div class="cell-sub"><%= b.vehicleNumber || '' %></div>
+                                </td>
+                                <td>
+                                    <div><%= b.startDate %> to</div>
+                                    <div><%= b.endDate %></div>
+                                </td>
+                                <td><%= b.estimatedKm %> km</td>
+                                <td class="amount">&#8377;<%= Math.round(b.totalAmount || 0) %></td>
+                                <td>
+                                    <% if (b.status === 'PENDING') { %>
+                                        <span class="badge badge-pending">Pending</span>
+                                    <% } else if (b.status === 'ACCEPTED') { %>
+                                        <span class="badge badge-accepted">Accepted</span>
+                                    <% } else if (b.status === 'PAID') { %>
+                                        <span class="badge badge-paid">Paid</span>
+                                    <% } else if (b.status === 'REJECTED') { %>
+                                        <span class="badge badge-rejected">Rejected</span>
+                                    <% } %>
+                                </td>
+                                <td>
+                                    <div class="actions">
+                                        <% if (b.status === 'PENDING') { %>
+                                            <a href="/admin/bookings/accept/<%= b.id %>" class="btn-accept">Accept</a>
+                                            <a href="/admin/bookings/reject/<%= b.id %>" class="btn-reject">Reject</a>
+                                        <% } %>
+                                        <a href="/admin/bookings/delete/<%= b.id %>" class="btn-delete"
+                                           onclick="return confirm('Delete this booking record?')">Delete</a>
+                                    </div>
+                                </td>
+                            </tr>
+                        <% }); %>
+                    </tbody>
+                </table>
+            </div>
+        <% } %>
+    </div>
+
+    <div class="footer">&copy; 2026 Car &amp; Bike Rental Admin Panel</div>
+
+</body>
+</html>

@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Bookings - Car &amp; Bike Rental</title>
+    <link rel="stylesheet" href="/css/user-bookings.css">
+</head>
+<body>
+
+    <nav class="navbar">
+        <a href="/" class="navbar-brand">CARBIKE <span>Rental</span></a>
+        <div class="nav-right">
+            <a href="/user/dashboard" class="nav-link btn-home">Dashboard</a>
+            <a href="/" class="nav-link btn-home">Home</a>
+            <form action="/logout" method="post" style="display:inline;">
+                <button type="submit" class="nav-link btn-primary" style="border:none; cursor:pointer; background:none; font:inherit;">Logout</button>
+            </form>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="page-header">
+            <h1>My Bookings</h1>
+            <p>Track the status of your rental requests and complete payment once approved.</p>
+        </div>
+
+        <% if (params.requested) { %>
+            <div class="alert alert-success">
+                &#9989; Your booking request has been sent. The admin will review it shortly.
+            </div>
+        <% } %>
+        <% if (params.paid) { %>
+            <div class="alert alert-success">
+                &#127881; Payment successful! Your booking is confirmed.
+            </div>
+        <% } %>
+        <% if (params.deleted) { %>
+            <div class="alert alert-success">
+                &#128465; Booking deleted successfully.
+            </div>
+        <% } %>
+
+        <% if (!bookings || bookings.length === 0) { %>
+            <div class="empty-state">
+                <span class="icon">&#128197;</span>
+                <h3>No Bookings Yet</h3>
+                <p>You haven't booked any vehicles yet. Browse our fleet and make your first booking.</p>
+                <a href="/user/dashboard" class="btn-browse">Browse Vehicles</a>
+            </div>
+        <% } else { %>
+            <div class="table-wrap">
+                <table class="bookings-table">
+                    <thead>
+                        <tr>
+                            <th>Vehicle</th>
+                            <th>Dates</th>
+                            <th>Est. KM</th>
+                            <th>Total</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% bookings.forEach(function(b) { %>
+                            <tr>
+                                <td>
+                                    <div class="vehicle-name"><%= b.vehicleName %></div>
+                                    <div class="vehicle-sub"><%= b.vehicleNumber || '' %></div>
+                                </td>
+                                <td>
+                                    <div><%= b.startDate %> to</div>
+                                    <div><%= b.endDate %></div>
+                                </td>
+                                <td><%= b.estimatedKm %> km</td>
+                                <td class="amount">&#8377;<%= Math.round(b.totalAmount || 0) %></td>
+                                <td>
+                                    <% if (b.status === 'PENDING') { %>
+                                        <span class="badge badge-pending">Pending Approval</span>
+                                    <% } else if (b.status === 'ACCEPTED') { %>
+                                        <span class="badge badge-accepted">Approved</span>
+                                    <% } else if (b.status === 'PAID') { %>
+                                        <span class="badge badge-paid">Paid &amp; Confirmed</span>
+                                    <% } else if (b.status === 'REJECTED') { %>
+                                        <span class="badge badge-rejected">Rejected</span>
+                                    <% } %>
+                                </td>
+                                <td>
+                                    <div class="row-actions">
+                                        <% if (b.status === 'ACCEPTED') { %>
+                                            <a href="/booking/pay/<%= b.id %>" class="btn-action btn-pay-now">Proceed to Pay</a>
+                                        <% } else if (b.status === 'PENDING') { %>
+                                            <span class="action-note">Awaiting approval</span>
+                                        <% } else if (b.status === 'PAID') { %>
+                                            <span class="action-note action-ok">&#10003; Confirmed</span>
+                                        <% } else if (b.status === 'REJECTED') { %>
+                                            <span class="action-note action-bad">Not approved</span>
+                                        <% } %>
+                                        <a href="/user/bookings/delete/<%= b.id %>" class="btn-action btn-delete"
+                                           onclick="return confirm('Delete this booking? This cannot be undone.')">Delete</a>
+                                    </div>
+                                </td>
+                            </tr>
+                        <% }); %>
+                    </tbody>
+                </table>
+            </div>
+        <% } %>
+    </div>
+
+    <div class="footer">&copy; 2026 Car &amp; Bike Rental. All rights reserved.</div>
+</body>
+</html>

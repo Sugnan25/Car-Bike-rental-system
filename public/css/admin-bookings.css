@@ -1,0 +1,118 @@
+* { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; background: #0f0f0f; color: #fff; min-height: 100vh; }
+
+        .navbar {
+            background: #1a1a2e; padding: 0 50px; height: 65px;
+            display: flex; justify-content: space-between; align-items: center;
+            border-bottom: 1px solid #2a2a4a;
+        }
+        .navbar-brand { font-size: 20px; font-weight: 700; color: #00d2ff; text-decoration: none; }
+        .navbar-brand span { color: #fff; font-weight: 400; margin-left: 8px; }
+        .nav-right { display: flex; gap: 12px; align-items: center; }
+        .nav-link { color: #aaa; text-decoration: none; padding: 8px 16px; border-radius: 6px; font-size: 14px; transition: all 0.3s; }
+        .nav-link:hover { color: #fff; background: rgba(255,255,255,0.08); }
+        .btn-back { background: rgba(0,210,255,0.1); border: 1px solid rgba(0,210,255,0.3); color: #00d2ff; }
+        .btn-back:hover { background: rgba(0,210,255,0.2); }
+
+        .container { max-width: 1200px; margin: 0 auto; padding: 50px 30px; }
+        .page-header { margin-bottom: 35px; }
+        .page-header h1 { font-size: 28px; font-weight: 700; margin-bottom: 6px; }
+        .page-header p { color: #888; font-size: 14px; }
+
+        .empty-state {
+            background: #1a1a2e; border: 1px solid #2a2a4a; border-radius: 14px;
+            text-align: center; padding: 80px 20px; color: #555;
+        }
+        .empty-state .icon { font-size: 60px; margin-bottom: 20px; display: block; }
+        .empty-state h3 { color: #888; font-size: 20px; margin-bottom: 10px; }
+        .empty-state p { font-size: 14px; }
+
+        .notif-badge {
+            background: rgba(239,68,68,0.15);
+            border: 1px solid rgba(239,68,68,0.4);
+            color: #ef4444;
+            font-size: 13px;
+            font-weight: 600;
+            padding: 6px 14px;
+            border-radius: 20px;
+        }
+        .pending-banner {
+            background: rgba(251,146,60,0.1);
+            border: 1px solid rgba(251,146,60,0.35);
+            color: #fbbf24;
+            padding: 14px 18px;
+            border-radius: 10px;
+            font-size: 14px;
+            margin-bottom: 25px;
+        }
+        .pending-banner strong { color: #fff; }
+
+        .table-wrap {
+            background: #1a1a2e; border: 1px solid #2a2a4a;
+            border-radius: 14px; overflow-x: auto;
+        }
+        .bookings-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+        .bookings-table thead th {
+            text-align: left; padding: 16px 18px; color: #888;
+            font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;
+            border-bottom: 1px solid #2a2a4a; white-space: nowrap;
+        }
+        .bookings-table tbody td {
+            padding: 16px 18px; border-bottom: 1px solid #23233f;
+            vertical-align: top; color: #ddd;
+        }
+        .bookings-table tbody tr:last-child td { border-bottom: none; }
+        .bookings-table tbody tr:hover { background: rgba(255,255,255,0.02); }
+        .row-pending { background: rgba(251,146,60,0.04); }
+        .cell-strong { color: #fff; font-weight: 600; margin-bottom: 2px; }
+        .cell-sub { color: #777; font-size: 12px; }
+        .amount { color: #00d2ff; font-weight: 700; }
+
+        .badge {
+            display: inline-block; padding: 5px 12px; border-radius: 20px;
+            font-size: 12px; font-weight: 600; white-space: nowrap;
+        }
+        .badge-pending { background: rgba(251,146,60,0.15); color: #fbbf24; border: 1px solid rgba(251,146,60,0.35); }
+        .badge-accepted { background: rgba(16,185,129,0.15); color: #34d399; border: 1px solid rgba(16,185,129,0.35); }
+        .badge-paid { background: rgba(0,210,255,0.15); color: #00d2ff; border: 1px solid rgba(0,210,255,0.35); }
+        .badge-rejected { background: rgba(239,68,68,0.15); color: #f87171; border: 1px solid rgba(239,68,68,0.35); }
+
+        .actions { display: flex; gap: 8px; }
+        .btn-accept, .btn-reject {
+            text-decoration: none; font-size: 13px; font-weight: 600;
+            padding: 7px 16px; border-radius: 8px; transition: all 0.3s;
+            white-space: nowrap;
+        }
+        .btn-accept { background: rgba(16,185,129,0.15); color: #34d399; border: 1px solid rgba(16,185,129,0.4); }
+        .btn-accept:hover { background: rgba(16,185,129,0.3); }
+        .btn-reject { background: rgba(239,68,68,0.12); color: #f87171; border: 1px solid rgba(239,68,68,0.4); }
+        .btn-reject:hover { background: rgba(239,68,68,0.25); }
+        .btn-delete {
+            text-decoration: none; font-size: 13px; font-weight: 600;
+            padding: 7px 16px; border-radius: 8px; transition: all 0.3s;
+            white-space: nowrap; background: transparent; color: #666; border: 1px solid #2a2a4a;
+        }
+        .btn-delete:hover { color: #f87171; border-color: rgba(239,68,68,0.5); }
+
+        .footer { text-align: center; padding: 30px; color: #444; font-size: 13px; border-top: 1px solid #1a1a2e; margin-top: 60px; }
+
+        @media (max-width: 768px) {
+            .navbar { padding: 0 20px; }
+            .container { padding: 30px 15px; }
+            .actions { flex-wrap: wrap; }
+            .notif-badge { display: block; width: fit-content; margin-bottom: 4px; }
+        }
+
+        @media (max-width: 480px) {
+            .navbar { padding: 10px 14px; height: auto; min-height: 58px; flex-wrap: wrap; row-gap: 8px; }
+            .navbar-brand { font-size: 16px; }
+            .navbar-brand span { display: none; }
+            .nav-right { flex-wrap: wrap; justify-content: flex-end; gap: 6px; }
+            .nav-link { padding: 6px 10px; font-size: 12px; }
+            .container { padding: 22px 14px; }
+            .page-header h1 { font-size: 24px; }
+            .bookings-table thead th, .bookings-table tbody td { padding: 12px 14px; }
+            .pending-banner { padding: 12px 14px; font-size: 13px; }
+            .actions { flex-direction: column; align-items: stretch; }
+            .actions .btn-accept, .actions .btn-reject, .actions .btn-delete { text-align: center; }
+        }

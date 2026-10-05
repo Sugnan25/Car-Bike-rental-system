@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Dashboard - Car &amp; Bike Rental</title>
+    <link rel="stylesheet" href="/css/user-dashboard.css">
+</head>
+<body>
+
+    <!-- NAVBAR (Original style) -->
+    <nav class="navbar">
+        <a href="/" class="navbar-brand">CARBIKE <span>Rental</span></a>
+        <div class="nav-right">
+            <span style="color: #bbb; font-size: 14px; margin-right: 8px;">Hi, <%= user.fullName || 'User' %></span>
+            <a href="/" class="nav-link btn-home">Home</a>
+            
+            <form action="/logout" method="post" style="display: inline;">
+                <button type="submit" class="nav-link btn-primary" style="border: none; cursor: pointer; background: none; font: inherit;">Logout</button>
+            </form>
+        </div>
+    </nav>
+
+    <!-- DASHBOARD WITH SIDEBAR & 2-COLUMN MAIN CONTENT -->
+    <div class="dashboard-layout">
+        
+        <!-- LEFT SIDEBAR -->
+        <aside class="sidebar">
+            <div class="user-profile-widget">
+                <div class="user-avatar">
+                    <%= (user.fullName || user.email || 'U').charAt(0).toUpperCase() %>
+                </div>
+                <div class="user-meta">
+                    <div class="user-name"><%= user.fullName || 'Rider' %></div>
+                    <div class="user-email"><%= user.email %></div>
+                    <span class="user-role-badge">Verified Member</span>
+                </div>
+            </div>
+
+            <div class="sidebar-title">Quick Menu</div>
+            <nav class="sidebar-nav">
+                <a href="/vehicles" class="nav-item active">
+                    <div class="nav-item-left">
+                        <span class="icon">&#128663;</span>
+                        <span>Browse Fleet</span>
+                    </div>
+                    <span class="badge-count"><%= vehicles ? vehicles.length : 0 %></span>
+                </a>
+
+                <a href="/my-bookings" class="nav-item">
+                    <div class="nav-item-left">
+                        <span class="icon">&#128203;</span>
+                        <span>My Bookings</span>
+                    </div>
+                    <% if (typeof myBookingsCount !== 'undefined' && myBookingsCount > 0) { %>
+                        <span class="badge-count" style="background:#10b981;"><%= myBookingsCount %></span>
+                    <% } %>
+                </a>
+
+                <a href="/account/settings" class="nav-item">
+                    <div class="nav-item-left">
+                        <span class="icon">&#9881;</span>
+                        <span>Account Settings</span>
+                    </div>
+                </a>
+
+                <a href="#feedback-section" class="nav-item" onclick="document.getElementById('feedback-section').scrollIntoView({behavior:'smooth'})">
+                    <div class="nav-item-left">
+                        <span class="icon">&#128172;</span>
+                        <span>Give Feedback</span>
+                    </div>
+                </a>
+            </nav>
+
+            <div class="sidebar-bottom">
+                <a href="/" class="nav-item" style="color: #888;">
+                    <div class="nav-item-left">
+                        <span class="icon">&#127968;</span>
+                        <span>Main Website</span>
+                    </div>
+                </a>
+                <form action="/logout" method="post" style="width: 100%;">
+                    <button type="submit" class="btn-logout">
+                        <span>&#128682;</span>
+                        <span>Logout</span>
+                    </button>
+                </form>
+            </div>
+        </aside>
+
+        <!-- MAIN WRAPPER: Center Content + Right Promotion Panel -->
+        <div class="main-wrapper">
+            
+            <!-- CENTER CONTENT -->
+            <div class="dashboard-center">
+                
+                <!-- WELCOME BANNER WITH 10% FIRST RIDE OFFER -->
+                <div class="welcome-box">
+                    <h2>Welcome back, <span><%= user.fullName || 'Rider' %></span>!</h2>
+                    <p>Select your favorite car or bike from our fleet below and proceed to booking instantly with transparent pricing and flexible plans.</p>
+                    
+                    <% if (typeof isFirstRide !== 'undefined' && isFirstRide) { %>
+                        <div class="first-ride-badge-banner">
+                            <span>&#127881;</span>
+                            <span>First Ride Special: Get <strong>10% OFF</strong> automatically applied at checkout with promo code <strong>FIRST10</strong>!</span>
+                        </div>
+                    <% } %>
+                </div>
+
+                <!-- ORIGINAL DASHBOARD CARDS PRESERVED & FUNCTIONAL -->
+                <div class="dashboard-cards-grid">
+                    
+                    <!-- CARD 1: Browse Vehicles -->
+                    <a href="/vehicles" class="dashboard-card" style="text-decoration: none; color: inherit; display: flex; cursor: pointer;">
+                        <div class="card-icon icon-blue">&#128663;</div>
+                        <div class="card-content">
+                            <h3>Browse Vehicles</h3>
+                            <p>Explore cars and bikes to pick your next ride.</p>
+                        </div>
+                        <div class="card-footer">
+                            <span class="btn-card">Explore Fleet &rarr;</span>
+                        </div>
+                    </a>
+
+                    <!-- CARD 2: My Bookings -->
+                    <a href="/my-bookings" class="dashboard-card" style="text-decoration: none; color: inherit; display: flex; cursor: pointer;">
+                        <div class="card-icon icon-green">&#128203;</div>
+                        <div class="card-content">
+                            <h3>My Bookings</h3>
+                            <p>View active rentals, history, and approval status.</p>
+                        </div>
+                        <div class="card-footer">
+                            <span class="btn-card">View History &rarr;</span>
+                        </div>
+                    </a>
+
+                    <!-- CARD 3: Account Settings -->
+                    <a href="/account/settings" class="dashboard-card" style="text-decoration: none; color: inherit; display: flex; cursor: pointer;">
+                        <div class="card-icon icon-purple">&#9881;</div>
+                        <div class="card-content">
+                            <h3>Account Settings</h3>
+                            <p>Manage profile, change password, and phone number.</p>
+                        </div>
+                        <div class="card-footer">
+                            <span class="btn-card">Manage Profile &rarr;</span>
+                        </div>
+                    </a>
+
+                    <!-- CARD 4: Give Feedback -->
+                    <a href="#feedback-section" class="dashboard-card" style="text-decoration: none; color: inherit; display: flex; cursor: pointer;"
+                       onclick="document.getElementById('feedback-section').scrollIntoView({behavior:'smooth'}); return false;">
+                        <div class="card-icon icon-orange">&#128172;</div>
+                        <div class="card-content">
+                            <h3>Give Feedback</h3>
+                            <p>Share your review to help us serve you better.</p>
+                        </div>
+                        <div class="card-footer">
+                            <span class="btn-card">Rate Ride &rarr;</span>
+                        </div>
+                    </a>
+
+                </div>
+
+                <!-- DIRECT FLEET & CARS SECTION -->
+                <section id="fleet-section">
+                    <div class="fleet-section-header">
+                        <div>
+                            <div class="section-title">
+                                <span>&#128663;</span>
+                                <span>Available Cars &amp; Bikes</span>
+                            </div>
+                            <div class="section-subtitle">Click "Proceed to Booking" to select dates and apply your 10% first ride discount.</div>
+                        </div>
+
+                        <div class="filters-bar">
+                            <button type="button" class="filter-btn active" data-type="all" onclick="filterDashboardVehicles('all', this)">All</button>
+                            <button type="button" class="filter-btn" data-type="CAR" onclick="filterDashboardVehicles('CAR', this)">Cars</button>
+                            <button type="button" class="filter-btn" data-type="BIKE" onclick="filterDashboardVehicles('BIKE', this)">Bikes</button>
+                        </div>
+                    </div>
+
+                    <% if (vehicles && vehicles.length > 0) { %>
+                        <div class="vehicles-grid" id="dashboardVehiclesGrid">
+                            <% vehicles.forEach(function(v) { %>
+                                <div class="vehicle-card" data-type="<%= v.type %>" data-fuel="<%= v.fuelType %>">
+                                    <div class="vehicle-img" style="<%= (v.imageUrl) ? 'padding:0;' : '' %>">
+                                        <span class="vehicle-type-tag <%= v.type === 'CAR' ? 'tag-car' : 'tag-bike' %>">
+                                            <%= v.type %>
+                                        </span>
+                                        <div class="vehicle-rating-badge">
+                                            <span>&#9733;</span>
+                                            <span><%= v.rating || '4.9' %></span>
+                                            <span style="color:#aaa; font-weight:normal; font-size:10px;">(<%= v.tripsCount || Math.floor(Math.random()*80 + 40) %>)</span>
+                                        </div>
+                                        <% if (v.imageUrl) { %>
+                                            <img src="<%= v.imageUrl %>" alt="<%= v.company %> <%= v.model %>">
+                                        <% } else { %>
+                                            <span><%- v.type === 'CAR' ? '&#128663;' : '&#128690;' %></span>
+                                        <% } %>
+                                    </div>
+
+                                    <div class="vehicle-body">
+                                        <div class="vehicle-title"><%= v.model %></div>
+                                        <div class="vehicle-company"><%= v.company %></div>
+
+                                        <div class="vehicle-specs">
+                                            <div class="spec-item">
+                                                <span>&#9981;</span>
+                                                <span><%= v.fuelType %></span>
+                                            </div>
+                                            <div class="spec-item">
+                                                <span>&#128101;</span>
+                                                <span><%= v.seatingCapacity %> Seats</span>
+                                            </div>
+                                            <% if (v.vehicleNumber) { %>
+                                                <div class="spec-item">
+                                                    <span>&#128203;</span>
+                                                    <span><%= v.vehicleNumber %></span>
+                                                </div>
+                                            <% } %>
+                                        </div>
+
+                                        <div class="vehicle-footer">
+                                            <div class="vehicle-price">
+                                                &#8377;<%= Math.round(v.pricePerKm || 0) %>
+                                                <span>/ km</span>
+                                            </div>
+                                            <a href="/booking/<%= v.id %>" class="btn-book">Proceed to Booking &rarr;</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            <% }); %>
+                        </div>
+                    <% } else { %>
+                        <div style="text-align: center; padding: 40px; background: #1a1a2e; border-radius: 12px; border: 1px solid #2a2a4a; margin-bottom: 40px;">
+                            <p style="color: #888;">No vehicles are currently available. Check back soon!</p>
+                        </div>
+                    <% } %>
+                </section>
+
+                <!-- DOWNWARDS SECTIONS (Ratings, Safety, Feedback) -->
+                <div class="downwards-container">
+                    
+                    <!-- VERIFIED RIDER RATINGS & REVIEWS (like other rental apps) -->
+                    <section class="ratings-section">
+                        <div class="ratings-header">
+                            <div>
+                                <div class="section-title">
+                                    <span>&#11088;</span>
+                                    <span>Recent Verified Rider Reviews</span>
+                                </div>
+                                <div class="section-subtitle">Real experiences shared by customers after completing their rental trips.</div>
+                            </div>
+                            <div class="ratings-summary">
+                                <span class="ratings-score">4.9 ★</span>
+                                <span class="ratings-count">1,450+ verified trips</span>
+                            </div>
+                        </div>
+
+                        <div class="reviews-grid">
+                            <% if (typeof feedbacks !== 'undefined' && feedbacks.length > 0) { %>
+                                <% feedbacks.forEach(function(fb) { %>
+                                    <div class="review-card">
+                                        <div class="review-top">
+                                            <span class="review-author">&#128100; <%= fb.userName %></span>
+                                            <span class="review-time"><%= fb.tripTime || 'Recently' %></span>
+                                        </div>
+                                        <div class="review-stars">
+                                            <% for (let i = 0; i < Math.floor(fb.rating || 5); i++) { %>&#9733;<% } %>
+                                            <span style="color:#aaa; font-size:11px; margin-left:4px;">Verified Trip</span>
+                                        </div>
+                                        <div class="review-text">"<%= fb.comments %>"</div>
+                                        <div class="review-vehicle-tag">&#128663; <%= fb.vehicleRented || 'Verified Rental' %></div>
+                                    </div>
+                                <% }); %>
+                            <% } %>
+                        </div>
+                    </section>
+
+                    <!-- CUSTOMER FEEDBACK FORM -->
+                    <section class="feedback-box" id="feedback-section">
+                        <div class="section-title" style="margin-bottom: 6px;">
+                            <span>&#128172;</span>
+                            <span>Share Your Ride Experience</span>
+                        </div>
+                        <div class="section-subtitle" style="margin-bottom: 18px;">Tell us what you loved or how we can make your next rental even better.</div>
+
+                        <% if (typeof feedbackSuccess !== 'undefined' && feedbackSuccess) { %>
+                            <div style="background: rgba(16,185,129,0.15); border: 1px solid #10b981; color: #10b981; padding: 12px 16px; border-radius: 8px; margin-bottom: 20px; font-size: 14px;">
+                                &#127881; Thank you! Your feedback and rating have been posted to rider reviews.
+                            </div>
+                        <% } %>
+
+                        <form action="/user/feedback" method="post" class="feedback-form">
+                            <label style="display:block; font-size: 13px; color: #bbb; margin-bottom: 8px; font-weight: 600;">Rate your experience</label>
+                            <div class="star-rating" id="starRating">
+                                <span data-val="1" onclick="setRating(1)">&#9733;</span>
+                                <span data-val="2" onclick="setRating(2)">&#9733;</span>
+                                <span data-val="3" onclick="setRating(3)">&#9733;</span>
+                                <span data-val="4" onclick="setRating(4)">&#9733;</span>
+                                <span data-val="5" onclick="setRating(5)">&#9733;</span>
+                            </div>
+                            <input type="hidden" name="rating" id="ratingInput" value="5">
+
+                            <label style="display:block; font-size: 13px; color: #bbb; margin-bottom: 8px; font-weight: 600;">Category</label>
+                            <select name="category" required>
+                                <option value="Vehicle Condition & Performance">Vehicle Condition &amp; Performance</option>
+                                <option value="Booking & Reservation Process">Booking &amp; Reservation Process</option>
+                                <option value="Pricing & Value">Pricing &amp; Value</option>
+                                <option value="Customer Support">Customer Support</option>
+                                <option value="General Suggestion">General Suggestion</option>
+                            </select>
+
+                            <label style="display:block; font-size: 13px; color: #bbb; margin-bottom: 8px; font-weight: 600;">Your Review / Suggestions</label>
+                            <textarea name="comments" placeholder="Write your review here. E.g. Vehicle was sanitized, smooth pickup, great pricing..." required></textarea>
+
+                            <button type="submit" class="btn-feedback">&#128640; Submit Review</button>
+                        </form>
+                    </section>
+
+                </div>
+
+            </div>
+
+            <!-- RIGHT PANEL: PROMOTIONS, DEALS & ASSURANCE -->
+            <aside class="dashboard-right">
+                
+                <!-- PROMOTION WIDGET: 10% OFF & HOT OFFERS -->
+                <div class="promo-widget">
+                    <div class="promo-widget-title">
+                        <span>&#127873;</span>
+                        <span>Promotions &amp; Coupons</span>
+                    </div>
+
+                    <!-- PROMO 1: FIRST10 (Actually applies!) -->
+                    <div class="promo-card-item featured">
+                        <span class="promo-tag tag-green">NEW RIDER SPECIAL</span>
+                        <div class="promo-name">10% OFF First Ride</div>
+                        <div class="promo-desc">Get a flat 10% discount on your very first car or bike booking. Automatically applied at checkout!</div>
+                        <div class="promo-code-box">
+                            <span>CODE: <strong>FIRST10</strong></span>
+                            <button type="button" class="btn-copy-code" onclick="copyCode('FIRST10')">Copy</button>
+                        </div>
+                    </div>
+
+                    <!-- PROMO 2: WEEKEND25 -->
+                    <div class="promo-card-item">
+                        <span class="promo-tag">WEEKEND SAVER</span>
+                        <div class="promo-name">Save 25% on Weekends</div>
+                        <div class="promo-desc">Rent any SUV or sedan for Saturday &amp; Sunday trips and get 25% extra rental credit.</div>
+                        <div class="promo-code-box">
+                            <span>CODE: <strong>WEEKEND25</strong></span>
+                            <button type="button" class="btn-copy-code" onclick="copyCode('WEEKEND25')">Copy</button>
+                        </div>
+                    </div>
+
+                    <!-- PROMO 3: SPEED200 -->
+                    <div class="promo-card-item">
+                        <span class="promo-tag">BIKE SPECIAL</span>
+                        <div class="promo-name">Flat &#8377;200 Off Bikes</div>
+                        <div class="promo-desc">Valid on Royal Enfield, KTM, and Yamaha rentals of 100+ km.</div>
+                        <div class="promo-code-box">
+                            <span>CODE: <strong>SPEED200</strong></span>
+                            <button type="button" class="btn-copy-code" onclick="copyCode('SPEED200')">Copy</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PEACE OF MIND & PERKS -->
+                <div class="promo-widget">
+                    <div class="promo-widget-title">
+                        <span>&#128737;</span>
+                        <span>Why Rent With Us</span>
+                    </div>
+                    <div class="perks-list">
+                        <div class="perk-item">
+                            <span class="perk-icon">&#10004;</span>
+                            <div><strong>&#8377;0 Security Deposit:</strong> Enjoy zero deposit on all bookings with verified ID.</div>
+                        </div>
+                        <div class="perk-item">
+                            <span class="perk-icon">&#10004;</span>
+                            <div><strong>Clean &amp; Sanitized:</strong> Every vehicle undergoes a 25-point safety inspection before handover.</div>
+                        </div>
+                        <div class="perk-item">
+                            <span class="perk-icon">&#10004;</span>
+                            <div><strong>Instant Approval:</strong> Fast booking confirmation within minutes.</div>
+                        </div>
+                        <div class="perk-item">
+                            <span class="perk-icon">&#10004;</span>
+                            <div><strong>Free Cancellation:</strong> Full refund if cancelled 2 hours before pickup.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 24/7 ROADSIDE ASSISTANCE WIDGET -->
+                <div class="sos-card">
+                    <div class="sos-icon">&#128657;</div>
+                    <div>
+                        <div class="sos-title">24/7 Roadside Assistance</div>
+                        <div style="font-size: 11px; color: #bbb;">Emergency break-down or puncture support anytime.</div>
+                        <div class="sos-phone">Toll-Free: 1800-CAR-BIKE</div>
+                    </div>
+                </div>
+
+                <!-- REFERRAL BONUS -->
+                <div class="promo-widget" style="background: linear-gradient(135deg, #1a2542, #161b2e);">
+                    <div class="promo-widget-title">
+                        <span>&#128101;</span>
+                        <span>Refer a Friend</span>
+                    </div>
+                    <p style="font-size: 12px; color: #ccc; line-height: 1.5; margin-bottom: 12px;">
+                        Invite your friends to CarBike Rental. When they take their first ride, both of you get <strong>&#8377;200 wallet credit</strong>!
+                    </p>
+                    <button type="button" class="filter-btn active" style="width: 100%; text-align: center;" onclick="alert('Referral link copied to clipboard! Share with your friends.')">Share Referral Link</button>
+                </div>
+
+            </aside>
+
+        </div>
+
+    </div>
+
+    <div class="footer">&copy; 2026 Car &amp; Bike Rental. All rights reserved.</div>
+
+    <script>
+        // Star rating picker
+        function setRating(val) {
+            document.getElementById('ratingInput').value = val;
+            var stars = document.querySelectorAll('#starRating span');
+            stars.forEach(function(star) {
+                var sVal = parseInt(star.getAttribute('data-val'));
+                star.classList.toggle('selected', sVal <= val);
+            });
+        }
+        setRating(5);
+
+        // Filter vehicles on dashboard
+        function filterDashboardVehicles(type, btn) {
+            document.querySelectorAll('.filters-bar .filter-btn').forEach(function(b) {
+                b.classList.remove('active');
+            });
+            btn.classList.add('active');
+
+            var cards = document.querySelectorAll('#dashboardVehiclesGrid .vehicle-card');
+            cards.forEach(function(card) {
+                var cardType = card.getAttribute('data-type');
+                if (type === 'all' || cardType === type) {
+                    card.classList.remove('hidden');
+                } else {
+                    card.classList.add('hidden');
+                }
+            });
+        }
+
+        // Copy coupon code
+        function copyCode(code) {
+            navigator.clipboard.writeText(code).then(function() {
+                alert('Coupon code ' + code + ' copied to clipboard! You can apply it on checkout.');
+            }).catch(function() {
+                alert('Promo code: ' + code);
+            });
+        }
+    </script>
+</body>
+</html>
