@@ -11,8 +11,8 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
-// CRITICAL: Always listen strictly on port 3000 for AI Studio environment
-const PORT = 3000;
+// AI Studio requires port 3000; Render / cloud hosts provide process.env.PORT
+const PORT = process.env.APPLET_ID ? 3000 : (process.env.PORT || 3000);
 
 // Ensure upload directory exists
 const uploadsDir = path.join(__dirname, 'public', 'uploads');
