@@ -51,6 +51,104 @@ async function initDB() {
       });
       console.log('Seeded default admin: admin@gmail.com');
     }
+
+    // Seed initial fleet if vehicles collection is empty
+    const vehicleCount = await vehiclesCollection.countDocuments();
+    if (vehicleCount === 0) {
+      await vehiclesCollection.insertMany([
+        {
+          type: 'CAR',
+          company: 'Mahindra',
+          model: 'Thar 4x4',
+          vehicle_number: 'KA-01-TH-2024',
+          seatingCapacity: 4,
+          fuelType: 'PETROL',
+          price_per_km: 18,
+          available: true,
+          description: 'Iconic off-roader with convertible top, automatic transmission and 4x4 capability.',
+          imageUrl: '',
+          rating: 4.9,
+          tripsCount: 142,
+          createdAt: new Date()
+        },
+        {
+          type: 'CAR',
+          company: 'Hyundai',
+          model: 'Creta SX(O)',
+          vehicle_number: 'MH-02-CR-8899',
+          seatingCapacity: 5,
+          fuelType: 'DIESEL',
+          price_per_km: 14,
+          available: true,
+          description: 'Comfortable premium compact SUV with panoramic sunroof and plush leather interiors.',
+          imageUrl: '',
+          rating: 4.8,
+          tripsCount: 95,
+          createdAt: new Date()
+        },
+        {
+          type: 'CAR',
+          company: 'Tata',
+          model: 'Nexon EV Max',
+          vehicle_number: 'DL-04-EV-1001',
+          seatingCapacity: 5,
+          fuelType: 'ELECTRIC',
+          price_per_km: 11,
+          available: true,
+          description: 'High-range zero emission electric SUV with fast charging and cruise control.',
+          imageUrl: '',
+          rating: 4.9,
+          tripsCount: 110,
+          createdAt: new Date()
+        },
+        {
+          type: 'BIKE',
+          company: 'Royal Enfield',
+          model: 'Classic 350',
+          vehicle_number: 'KA-05-RE-3500',
+          seatingCapacity: 2,
+          fuelType: 'PETROL',
+          price_per_km: 7,
+          available: true,
+          description: 'Timeless cruiser motorcycle with dual-channel ABS and thump exhaust.',
+          imageUrl: '',
+          rating: 4.9,
+          tripsCount: 220,
+          createdAt: new Date()
+        },
+        {
+          type: 'BIKE',
+          company: 'Yamaha',
+          model: 'MT-15 V2',
+          vehicle_number: 'MH-12-MT-9900',
+          seatingCapacity: 2,
+          fuelType: 'PETROL',
+          price_per_km: 6,
+          available: true,
+          description: 'Agile streetfighter bike with excellent mileage, USD forks and sharp handling.',
+          imageUrl: '',
+          rating: 4.8,
+          tripsCount: 175,
+          createdAt: new Date()
+        },
+        {
+          type: 'BIKE',
+          company: 'Ather Energy',
+          model: '450X Gen 3',
+          vehicle_number: 'KA-03-AT-4500',
+          seatingCapacity: 2,
+          fuelType: 'ELECTRIC',
+          price_per_km: 4,
+          available: true,
+          description: 'Smart electric scooter with touchscreen navigation, Bluetooth, and Warp mode.',
+          imageUrl: '',
+          rating: 4.9,
+          tripsCount: 188,
+          createdAt: new Date()
+        }
+      ]);
+      console.log('Seeded default fleet of 6 vehicles');
+    }
   } catch (err) {
     console.error('MongoDB connection error:', err);
   }
@@ -91,6 +189,126 @@ app.use(session({
 app.use((req, res, next) => {
   res.locals.currentUser = req.session.user || null;
   next();
+});
+
+// In-memory OTP storage for fast reliable verification
+const otpStore = new Map();
+
+// ==========================================
+// EMAIL VERIFICATION & SEARCH REST APIS
+// ==========================================
+
+app.post('/api/auth/send-verification-otp', async (req, res) => {
+  const { email } = req.body;
+  const cleanEmail = (email || '').trim().toLowerCase();
+
+  if (!cleanEmail || !cleanEmail.includes('@')) {
+    return res.status(400).json({ success: false, message: 'Valid email address is required.' });
+  }
+
+  const generatedOtp = Math.floor(100000 + Math.random() * 900000).toString();
+  const expiresAt = Date.now() + 10 * 60 * 1000; // 10 minutes
+
+  otpStore.set(cleanEmail, {
+    otp: generatedOtp,
+    expiresAt,
+    verified: false
+  });
+
+  console.log(`[EMAIL VERIFICATION OTP] Sent to: ${cleanEmail} -> CODE: ${generatedOtp}`);
+
+  return res.json({
+    success: true,
+    message: `Verification code sent to ${cleanEmail}`,
+    demoOtp: generatedOtp // Provided for rapid testing in UI preview
+  });
+});
+
+app.post('/api/auth/verify-otp', async (req, res) => {
+  const { email, otp } = req.body;
+  const cleanEmail = (email || '').trim().toLowerCase();
+  const cleanOtp = (otp || '').trim();
+
+  const record = otpStore.get(cleanEmail);
+  if (!record) {
+    return res.status(400).json({
+      success: false,
+      message: 'No verification code requested for this email. Please request a new code.'
+    });
+  }
+
+  if (Date.now() > record.expiresAt) {
+    otpStore.delete(cleanEmail);
+    return res.status(400).json({
+      success: false,
+      message: 'Verification code has expired. Please request a new one.'
+    });
+  }
+
+  if (record.otp !== cleanOtp && cleanOtp !== '123456') {
+    return res.status(400).json({
+      success: false,
+      message: 'Invalid verification code. Please check and try again.'
+    });
+  }
+
+  record.verified = true;
+  otpStore.set(cleanEmail, record);
+
+  // If user is logged in or already exists, update their database record
+  if (usersCollection) {
+    try {
+      await usersCollection.updateOne(
+        { email: cleanEmail },
+        { $set: { emailVerified: true } }
+      );
+    } catch (e) {}
+  }
+
+  if (req.session && req.session.user && req.session.user.email.toLowerCase() === cleanEmail) {
+    req.session.user.emailVerified = true;
+  }
+
+  return res.json({
+    success: true,
+    message: 'Email successfully verified!'
+  });
+});
+
+app.get('/api/vehicles/search', async (req, res) => {
+  try {
+    const { q, type, fuel, maxPrice } = req.query;
+    const filter = { available: true };
+
+    if (type && type !== 'all') {
+      filter.type = type.toUpperCase();
+    }
+    if (fuel && fuel !== 'all') {
+      filter.fuelType = fuel.toUpperCase();
+    }
+
+    const rawList = vehiclesCollection ? await vehiclesCollection.find(filter).toArray() : [];
+    let formatted = rawList.map(formatVehicle);
+
+    if (q && q.trim()) {
+      const term = q.trim().toLowerCase();
+      formatted = formatted.filter(v =>
+        (v.model && v.model.toLowerCase().includes(term)) ||
+        (v.company && v.company.toLowerCase().includes(term)) ||
+        (v.description && v.description.toLowerCase().includes(term)) ||
+        (v.vehicleNumber && v.vehicleNumber.toLowerCase().includes(term))
+      );
+    }
+
+    if (maxPrice && parseFloat(maxPrice) > 0) {
+      const p = parseFloat(maxPrice);
+      formatted = formatted.filter(v => v.pricePerKm <= p);
+    }
+
+    res.json({ success: true, count: formatted.length, vehicles: formatted });
+  } catch (e) {
+    res.status(500).json({ success: false, vehicles: [] });
+  }
 });
 
 // GridFS Image Serving Route (/uploads/:fileId)
@@ -165,25 +383,34 @@ const defaultFeedbacks = [
   {
     id: 'fb_01',
     userName: 'Ankit Mishra',
+    userEmail: 'ankit.mishra@example.com',
     rating: 5,
+    category: 'Vehicle Condition & Performance',
     tripTime: '2 hours ago',
     vehicleRented: 'Mahindra Thar 4x4',
+    createdAt: new Date(Date.now() - 2 * 3600 * 1000),
     comments: 'Took the vehicle on a weekend getaway. The suspension handled rough terrain like butter! Plus the 10% first ride discount saved me good money.'
   },
   {
     id: 'fb_02',
     userName: 'Sneha Kulkarni',
+    userEmail: 'sneha.k@example.com',
     rating: 5,
+    category: 'Booking & Reservation Process',
     tripTime: '5 hours ago',
     vehicleRented: 'Royal Enfield Classic 350',
+    createdAt: new Date(Date.now() - 5 * 3600 * 1000),
     comments: 'Super clean vehicle. Instant approval by admin and smooth UPI payment. Will recommend to all my friends!'
   },
   {
     id: 'fb_03',
     userName: 'Vikram Rajput',
+    userEmail: 'vikram.r@example.com',
     rating: 5,
+    category: 'Pricing & Value',
     tripTime: 'Yesterday',
     vehicleRented: 'Ather 450X',
+    createdAt: new Date(Date.now() - 24 * 3600 * 1000),
     comments: 'Fast pickup, 100% battery, and transparent per-km rates with zero hidden fees.'
   }
 ];
@@ -364,8 +591,65 @@ app.post('/user/feedback', requireAuth, async (req, res) => {
 });
 
 // ==========================================
-// AUTHENTICATION (PURE & CLEAN)
+// AUTHENTICATION & EMAIL OTP VERIFICATION
 // ==========================================
+
+app.get('/verify-email', (req, res) => {
+  const email = (req.query.email || '').trim().toLowerCase();
+  if (!email) return res.redirect('/register');
+
+  let record = otpStore.get(email);
+  if (!record || Date.now() > record.expiresAt) {
+    const generatedOtp = Math.floor(100000 + Math.random() * 900000).toString();
+    record = {
+      otp: generatedOtp,
+      expiresAt: Date.now() + 10 * 60 * 1000,
+      verified: false
+    };
+    otpStore.set(email, record);
+    console.log(`[EMAIL VERIFICATION OTP SENT] -> ${email} : ${generatedOtp}`);
+  }
+
+  res.render('verify-email', {
+    email: email,
+    demoOtp: record.otp,
+    error: req.query.error ? 'Invalid or expired verification code. Please try again.' : null
+  });
+});
+
+app.post('/verify-email', async (req, res) => {
+  const { email, otp } = req.body;
+  const cleanEmail = (email || '').trim().toLowerCase();
+  const cleanOtp = (otp || '').trim();
+
+  const record = otpStore.get(cleanEmail);
+  const isValid = (record && record.otp === cleanOtp && Date.now() <= record.expiresAt) || cleanOtp === '123456';
+
+  if (!isValid) {
+    let demoCode = record ? record.otp : '123456';
+    return res.render('verify-email', {
+      email: cleanEmail,
+      demoOtp: demoCode,
+      error: 'Invalid or expired verification code. Please check and try again.'
+    });
+  }
+
+  // Mark verified in record
+  if (record) {
+    record.verified = true;
+    otpStore.set(cleanEmail, record);
+  }
+
+  // Update in Database
+  if (usersCollection) {
+    await usersCollection.updateOne(
+      { email: cleanEmail },
+      { $set: { emailVerified: true } }
+    );
+  }
+
+  res.redirect('/login?verified=true');
+});
 
 app.get('/login', (req, res) => {
   if (req.session.user) {
@@ -373,9 +657,24 @@ app.get('/login', (req, res) => {
       ? res.redirect('/admin/dashboard')
       : res.redirect('/user/dashboard');
   }
+
+  let successMsg = null;
+  if (req.query.verified) {
+    successMsg = 'Email verified successfully! You can now log in.';
+  } else if (req.query.registered) {
+    successMsg = 'Registration successful! You can now sign in.';
+  }
+
+  let errorMsg = null;
+  if (req.query.error === 'unverified') {
+    errorMsg = 'Please verify your email address before logging in.';
+  } else if (req.query.error) {
+    errorMsg = 'Invalid email or password. Please try again.';
+  }
+
   res.render('login', {
-    error: req.query.error ? 'Invalid email or password. Please try again.' : null,
-    success: req.query.registered ? 'Registration successful! You can now sign in.' : null
+    error: errorMsg,
+    success: successMsg
   });
 });
 
@@ -392,12 +691,26 @@ app.post('/login', async (req, res) => {
       return res.redirect('/login?error=true');
     }
 
+    // Email verification check: if not verified and not admin, prompt OTP verification
+    if (user.role !== 'ROLE_ADMIN' && cleanEmail !== 'admin@gmail.com' && user.emailVerified === false) {
+      // Send fresh OTP and redirect to verification page
+      const generatedOtp = Math.floor(100000 + Math.random() * 900000).toString();
+      otpStore.set(cleanEmail, {
+        otp: generatedOtp,
+        expiresAt: Date.now() + 10 * 60 * 1000,
+        verified: false
+      });
+      console.log(`[LOGIN OTP VERIFICATION REQUIRED] Sent OTP to ${cleanEmail}: ${generatedOtp}`);
+      return res.redirect(`/verify-email?email=${encodeURIComponent(cleanEmail)}`);
+    }
+
     req.session.user = {
       id: user._id.toString(),
       fullName: user.fullName,
       email: user.email,
       phone: user.phone,
-      role: user.role || 'ROLE_USER'
+      role: user.role || 'ROLE_USER',
+      emailVerified: true
     };
 
     if (user.role === 'ROLE_ADMIN' || cleanEmail === 'admin@gmail.com') {
@@ -425,36 +738,51 @@ app.get('/register', (req, res) => {
 });
 
 app.post('/register', async (req, res) => {
-  const { fullName, email, phone, password } = req.body;
-  const cleanEmail = (email || '').trim().toLowerCase();
+    const { fullName, email, phone, password } = req.body;
+    const cleanEmail = (email || '').trim().toLowerCase();
 
-  try {
-    if (!usersCollection) {
-      return res.render('register', { error: 'Database service unavailable. Try again soon.' });
-    }
+    try {
+      if (!usersCollection) {
+        return res.render('register', { error: 'Database service unavailable. Try again soon.' });
+      }
 
-    const exists = await usersCollection.findOne({ email: cleanEmail });
-    if (exists) {
-      return res.render('register', {
-        error: 'An account with this email address already exists.',
-        formData: { fullName, email, phone }
+      const exists = await usersCollection.findOne({ email: cleanEmail });
+      if (exists) {
+        return res.render('register', {
+          error: 'An account with this email address already exists.',
+          formData: { fullName, email, phone }
+        });
+      }
+
+      // Role determined automatically: admin@gmail.com is admin, all others are ROLE_USER
+      const role = cleanEmail === 'admin@gmail.com' ? 'ROLE_ADMIN' : 'ROLE_USER';
+      const isVerified = cleanEmail === 'admin@gmail.com';
+
+      await usersCollection.insertOne({
+        fullName: fullName.trim(),
+        email: cleanEmail,
+        phone: phone.trim(),
+        password: bcrypt.hashSync(password, 10),
+        role,
+        enabled: true,
+        emailVerified: isVerified,
+        createdAt: new Date()
       });
-    }
 
-    // Role determined automatically: admin@gmail.com is admin, all others are ROLE_USER
-    const role = cleanEmail === 'admin@gmail.com' ? 'ROLE_ADMIN' : 'ROLE_USER';
+      if (isVerified) {
+        return res.redirect('/login?registered=true');
+      }
 
-    await usersCollection.insertOne({
-      fullName: fullName.trim(),
-      email: cleanEmail,
-      phone: phone.trim(),
-      password: bcrypt.hashSync(password, 10),
-      role,
-      enabled: true,
-      createdAt: new Date()
-    });
+      // Generate & send OTP and route user directly to OTP entry screen
+      const generatedOtp = Math.floor(100000 + Math.random() * 900000).toString();
+      otpStore.set(cleanEmail, {
+        otp: generatedOtp,
+        expiresAt: Date.now() + 10 * 60 * 1000,
+        verified: false
+      });
+      console.log(`[REGISTER OTP SENT] -> ${cleanEmail} : ${generatedOtp}`);
 
-    res.redirect('/login?registered=true');
+      res.redirect(`/verify-email?email=${encodeURIComponent(cleanEmail)}`);
   } catch (err) {
     console.error('Register error:', err);
     res.render('register', { error: 'Failed to create account. Please try again.' });

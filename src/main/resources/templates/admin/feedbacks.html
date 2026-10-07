@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Feedbacks - Admin</title>
+    <link rel="stylesheet" th:href="@{/css/admin-users.css}" href="/css/admin-users.css">
+</head>
+<body>
+
+    <nav class="navbar">
+        <a th:href="@{/admin}" href="/admin" class="navbar-brand">CARBIKE <span>Admin</span></a>
+        <div class="nav-right">
+            <a th:href="@{/admin/dashboard}" href="/admin/dashboard" class="nav-link btn-back">Dashboard</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="header">
+            <h1>Customer Reviews &amp; Feedback</h1>
+            <p>Monitor ratings and feedback submitted by verified riders.</p>
+        </div>
+
+        <div class="table-wrap" th:if="${feedbacks != null and !#lists.isEmpty(feedbacks)}">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Customer</th>
+                        <th>Rating</th>
+                        <th>Category</th>
+                        <th>Comments</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="fb : ${feedbacks}">
+                        <td>
+                            <strong th:text="${fb.userName}">Customer Name</strong>
+                            <div style="font-size:12px; color:#888;" th:text="${fb.userEmail}">customer@email.com</div>
+                        </td>
+                        <td>
+                            <span style="color: #f59e0b; font-size:15px;" th:text="${fb.rating != null ? fb.rating : '5.0'} + ' ★'">5 ★</span>
+                        </td>
+                        <td>
+                            <span class="badge badge-admin" th:text="${fb.category}">Service</span>
+                        </td>
+                        <td style="max-width:320px; line-height:1.4;" th:text="${fb.comments}">Great rental experience!</td>
+                        <td>
+                            <a th:href="@{'/admin/feedbacks/delete/' + ${fb.id}}" class="btn-delete" onclick="return confirm('Delete feedback entry?')">Delete</a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="footer">&copy; 2026 Car &amp; Bike Rental Admin Panel</div>
+</body>
+</html>

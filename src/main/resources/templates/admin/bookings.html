@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Bookings - Admin</title>
+    <link rel="stylesheet" th:href="@{/css/admin-bookings.css}" href="/css/admin-bookings.css">
+</head>
+<body>
+
+    <nav class="navbar">
+        <a th:href="@{/admin}" href="/admin" class="navbar-brand">CARBIKE <span>Admin</span></a>
+        <div class="nav-right">
+            <a th:href="@{/admin/dashboard}" href="/admin/dashboard" class="nav-link btn-back">Dashboard</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="header">
+            <div>
+                <h1>Manage Bookings</h1>
+                <p>Review customer rental requests and grant approvals.</p>
+            </div>
+        </div>
+
+        <div class="table-wrap" th:if="${bookings != null and !#lists.isEmpty(bookings)}">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Booking ID</th>
+                        <th>Customer</th>
+                        <th>Vehicle</th>
+                        <th>Dates</th>
+                        <th>Distance</th>
+                        <th>Total</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="b : ${bookings}">
+                        <td><strong th:text="${#strings.substring(b.id, 0, 8)}">B12345</strong></td>
+                        <td>
+                            <div th:text="${b.userName}">Customer Name</div>
+                            <div style="font-size:11px; color:#888;" th:text="${b.userEmail}">customer@email.com</div>
+                        </td>
+                        <td th:text="${b.vehicleName}">Mahindra Thar</td>
+                        <td>
+                            <div th:text="'From: ' + ${b.startDate}">From: 2026-10-10</div>
+                            <div th:text="'To: ' + ${b.endDate}">To: 2026-10-12</div>
+                        </td>
+                        <td th:text="${b.estimatedKm} + ' km'">150 km</td>
+                        <td><strong th:text="'₹' + ${#numbers.formatDecimal(b.totalAmount != null ? b.totalAmount : 0, 0, 0)}">₹2,700</strong></td>
+                        <td>
+                            <span class="badge" 
+                                  th:classappend="${b.status == 'PAID' or b.status == 'ACCEPTED'} ? 'badge-accepted' : (${b.status == 'REJECTED'} ? 'badge-rejected' : 'badge-pending')"
+                                  th:text="${b.status}">PENDING</span>
+                        </td>
+                        <td>
+                            <a th:if="${b.status == 'PENDING'}" th:href="@{'/admin/bookings/accept/' + ${b.id}}" class="btn-action btn-accept">&#10004; Accept</a>
+                            <a th:if="${b.status == 'PENDING'}" th:href="@{'/admin/bookings/reject/' + ${b.id}}" class="btn-action btn-reject">&times; Reject</a>
+                            <a th:href="@{'/admin/bookings/delete/' + ${b.id}}" class="btn-action btn-delete" onclick="return confirm('Delete booking record?')">Delete</a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="footer">&copy; 2026 Car &amp; Bike Rental Admin Panel</div>
+</body>
+</html>

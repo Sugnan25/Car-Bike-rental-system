@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verify Email - Car &amp; Bike Rental</title>
+    <link rel="stylesheet" th:href="@{/css/login.css}" href="/css/login.css">
+    <style>
+        .otp-boxes {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin: 20px 0;
+        }
+        .otp-digit {
+            width: 48px;
+            height: 56px;
+            background: #0b0f19;
+            border: 2px solid #2a3454;
+            border-radius: 10px;
+            color: #00d2ff;
+            font-size: 24px;
+            font-weight: 700;
+            text-align: center;
+            outline: none;
+            transition: all 0.2s;
+        }
+        .otp-digit:focus {
+            border-color: #00d2ff;
+            box-shadow: 0 0 12px rgba(0, 210, 255, 0.3);
+            background: #0e1424;
+        }
+        .email-highlight {
+            color: #00d2ff;
+            font-weight: 600;
+            word-break: break-all;
+        }
+        .timer-text {
+            color: #94a3b8;
+            font-size: 13px;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+        .resend-link {
+            color: #00d2ff;
+            text-decoration: none;
+            font-weight: 600;
+            cursor: pointer;
+            background: none;
+            border: none;
+            padding: 0;
+            font: inherit;
+        }
+        .demo-box {
+            background: rgba(59, 130, 246, 0.12);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            border-radius: 8px;
+            padding: 10px 14px;
+            margin-bottom: 20px;
+            font-size: 12px;
+            color: #93c5fd;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .btn-fill-otp {
+            background: #3b82f6;
+            border: none;
+            color: #fff;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="left">
+        <h1>Email Verification</h1>
+        <p>Protecting your account with secure OTP verification. Enter the 6-digit code sent to your email to verify and start renting.</p>
+    </div>
+
+    <div class="right">
+        <div class="form-box">
+            <h2>Enter Verification OTP</h2>
+            <p class="subtitle">We've sent a 6-digit code to <span class="email-highlight" id="displayEmail" th:text="${email}">your email</span></p>
+
+            <div th:if="${error != null}" style="background: rgba(239,68,68,0.15); color: #ef4444; border: 1px solid #ef4444; padding: 10px 14px; border-radius: 8px; margin-bottom: 18px; font-size: 13px;" th:text="${error}">
+                Error message
+            </div>
+
+            <form th:action="@{/verify-email}" action="/verify-email" method="post" id="verifyForm">
+                <input type="hidden" name="email" id="emailHidden" th:value="${email}">
+                <input type="hidden" name="otp" id="fullOtpInput" value="">
+
+                <div class="otp-boxes">
+                    <input type="text" class="otp-digit" maxlength="1" pattern="[0-9]" inputmode="numeric" autofocus required>
+                    <input type="text" class="otp-digit" maxlength="1" pattern="[0-9]" inputmode="numeric" required>
+                    <input type="text" class="otp-digit" maxlength="1" pattern="[0-9]" inputmode="numeric" required>
+                    <input type="text" class="otp-digit" maxlength="1" pattern="[0-9]" inputmode="numeric" required>
+                    <input type="text" class="otp-digit" maxlength="1" pattern="[0-9]" inputmode="numeric" required>
+                    <input type="text" class="otp-digit" maxlength="1" pattern="[0-9]" inputmode="numeric" required>
+                </div>
+
+                <div class="timer-text">
+                    Didn't receive the OTP? 
+                    <button type="button" id="resendBtn" class="resend-link" onclick="resendOtp()">Resend Code</button>
+                    <span id="timerCountdown" style="display:none; color:#888;"> (in <span id="secs">60</span>s)</span>
+                </div>
+
+                <button type="submit" class="btn-submit">&#10004; Verify OTP &amp; Proceed to Login</button>
+            </form>
+
+            <div class="form-footer" style="margin-top: 25px;">
+                Wrong email address? <a th:href="@{/register}" href="/register">Register Again</a>
+                <br><br>
+                <a th:href="@{/login}" href="/login" style="color: #888; font-size: 13px;">&larr; Back to Login</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        var digits = document.querySelectorAll('.otp-digit');
+        var form = document.getElementById('verifyForm');
+        var fullOtpInput = document.getElementById('fullOtpInput');
+
+        digits.forEach(function(input, index) {
+            input.addEventListener('input', function() {
+                var val = this.value.replace(/\D/g, '');
+                this.value = val;
+                if (val && index < digits.length - 1) {
+                    digits[index + 1].focus();
+                }
+                updateFullOtp();
+            });
+
+            input.addEventListener('keydown', function(e) {
+                if (e.key === 'Backspace' && !this.value && index > 0) {
+                    digits[index - 1].focus();
+                }
+            });
+        });
+
+        function updateFullOtp() {
+            var otp = '';
+            digits.forEach(function(d) { otp += d.value; });
+            fullOtpInput.value = otp;
+        }
+
+        form.addEventListener('submit', function(e) {
+            updateFullOtp();
+            if (fullOtpInput.value.length < 6) {
+                e.preventDefault();
+                alert('Please enter all 6 digits of the OTP verification code.');
+            }
+        });
+    </script>
+</body>
+</html>

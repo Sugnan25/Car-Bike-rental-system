@@ -115,10 +115,19 @@
                         <div class="form-group">
                             <label>&#128197; Start Date</label>
                             <input type="date" id="startDate" name="startDate" required onchange="calculateTotal()">
+                            <div class="date-preset-chips">
+                                <button type="button" class="date-chip" onclick="setPresetDate('startDate', 0)">Today</button>
+                                <button type="button" class="date-chip" onclick="setPresetDate('startDate', 1)">Tomorrow</button>
+                            </div>
                         </div>
                         <div class="form-group">
                             <label>&#128197; End Date</label>
                             <input type="date" id="endDate" name="endDate" required onchange="calculateTotal()">
+                            <div class="date-preset-chips">
+                                <button type="button" class="date-chip" onclick="setPresetDate('endDate', 2)">+2 Days</button>
+                                <button type="button" class="date-chip" onclick="setPresetDate('endDate', 5)">+5 Days</button>
+                                <button type="button" class="date-chip" onclick="setPresetDate('endDate', 7)">+1 Week</button>
+                            </div>
                         </div>
                     </div>
 
@@ -197,6 +206,18 @@
             }
 
             document.getElementById('totalAmount').textContent = '₹' + Math.round(total).toLocaleString('en-IN');
+        }
+
+        // Preset date helper
+        function setPresetDate(fieldId, offsetDays) {
+            var target = new Date();
+            target.setDate(target.getDate() + offsetDays);
+            var yyyy = target.getFullYear();
+            var mm = String(target.getMonth() + 1).padStart(2, '0');
+            var dd = String(target.getDate()).padStart(2, '0');
+            var dateStr = yyyy + '-' + mm + '-' + dd;
+            document.getElementById(fieldId).value = dateStr;
+            calculateTotal();
         }
 
         // Set min dates to today

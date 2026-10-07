@@ -55,7 +55,7 @@
                                     <span class="badge badge-admin"><%= fb.category %></span>
                                 </td>
                                 <td style="max-width:320px; line-height:1.4;"><%= fb.comments %></td>
-                                <td style="font-size:12px; color:#888;"><%= new Date(fb.createdAt).toLocaleDateString() %></td>
+                                <td style="font-size:12px; color:#888;"><%= fb.createdAt ? new Date(fb.createdAt).toLocaleDateString() : (fb.tripTime || 'N/A') %></td>
                                 <td>
                                     <a href="/admin/feedbacks/delete/<%= fb.id %>" class="btn-delete"
                                        onclick="return confirm('Delete this feedback entry?')">Delete</a>

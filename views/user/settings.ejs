@@ -45,8 +45,28 @@
                 </div>
 
                 <div class="form-group">
-                    <label>Email Address</label>
-                    <input type="email" value="<%= user ? user.email : '' %>" readonly class="readonly">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 7px;">
+                        <label style="margin: 0;">Email Address</label>
+                        <% if (user && user.emailVerified) { %>
+                            <span style="display: inline-flex; align-items: center; gap: 4px; background: rgba(16, 185, 129, 0.15); border: 1px solid #10b981; color: #10b981; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 700;">
+                                &#10004; Verified
+                            </span>
+                        <% } else { %>
+                            <button type="button" onclick="triggerSettingsEmailOtp()" style="background: rgba(0, 210, 255, 0.15); border: 1px solid #00d2ff; color: #00d2ff; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 700; cursor: pointer;">
+                                Verify Email Now &rarr;
+                            </button>
+                        <% } %>
+                    </div>
+                    <input type="email" id="settingsEmail" value="<%= user ? user.email : '' %>" readonly class="readonly">
+                    
+                    <div id="settingsOtpBox" style="display: none; margin-top: 10px; background: rgba(0, 210, 255, 0.05); border: 1px dashed #00d2ff; padding: 12px; border-radius: 8px;">
+                        <div style="font-size: 12px; color: #aaa; margin-bottom: 6px;">Enter the 6-digit code sent to your email:</div>
+                        <div style="display: flex; gap: 8px;">
+                            <input type="text" id="settingsOtpInput" placeholder="Enter OTP" maxlength="6" style="flex:1; background:#0f0f1a; border:1px solid #2a2a4a; color:#00d2ff; padding:8px; border-radius:6px; font-weight:bold; letter-spacing:2px; text-align:center;">
+                            <button type="button" onclick="verifySettingsOtp()" style="background:#00d2ff; border:none; color:#000; font-weight:bold; padding:8px 14px; border-radius:6px; cursor:pointer;">Confirm</button>
+                        </div>
+                        <div id="settingsOtpDemo" style="display:none; font-size:11px; color:#38bdf8; margin-top:6px;">Demo Code: <strong id="settingsDemoVal"></strong></div>
+                    </div>
                 </div>
 
                 <div class="form-group">
@@ -111,5 +131,57 @@
     <div class="footer">&copy; 2026 Car &amp; Bike Rental. All rights reserved.</div>
 
     <script src="/js/password-toggle.js"></script>
+    <script>
+        async function triggerSettingsEmailOtp() {
+            var email = document.getElementById('settingsEmail').value;
+            if (!email) return;
+
+            try {
+                var res = await fetch('/api/auth/send-verification-otp', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: email })
+                });
+                var data = await res.json();
+                if (data.success) {
+                    document.getElementById('settingsOtpBox').style.display = 'block';
+                    if (data.demoOtp) {
+                        document.getElementById('settingsDemoVal').textContent = data.demoOtp;
+                        document.getElementById('settingsOtpDemo').style.display = 'block';
+                    }
+                } else {
+                    alert(data.message || 'Failed to send OTP.');
+                }
+            } catch (e) {
+                alert('Failed to connect to verification server.');
+            }
+        }
+
+        async function verifySettingsOtp() {
+            var email = document.getElementById('settingsEmail').value;
+            var otp = document.getElementById('settingsOtpInput').value.trim();
+            if (!otp) {
+                alert('Please enter the OTP code.');
+                return;
+            }
+
+            try {
+                var res = await fetch('/api/auth/verify-otp', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: email, otp: otp })
+                });
+                var data = await res.json();
+                if (data.success) {
+                    alert('Email verified successfully!');
+                    window.location.reload();
+                } else {
+                    alert(data.message || 'Invalid OTP code.');
+                }
+            } catch (e) {
+                alert('Verification failed. Please try again.');
+            }
+        }
+    </script>
 </body>
 </html>

@@ -104,21 +104,91 @@
         </div>
 
         <% if (vehicles && vehicles.length > 0) { %>
-            <div class="filters">
-                <div class="filter-tabs">
-                    <span class="filter-label">Type</span>
-                    <button type="button" class="filter-btn type-btn active" data-filter="all" onclick="filterVehicles('all')">All</button>
-                    <button type="button" class="filter-btn type-btn" data-filter="CAR" onclick="filterVehicles('CAR')">Cars</button>
-                    <button type="button" class="filter-btn type-btn" data-filter="BIKE" onclick="filterVehicles('BIKE')">Bikes</button>
+            <!-- ADVANCED SEARCH & MULTI-FILTER BAR -->
+            <div class="search-filter-box">
+                <!-- Search Input Row -->
+                <div class="search-bar-row">
+                    <div class="search-input-wrap">
+                        <span class="search-icon">&#128269;</span>
+                        <input type="text" id="vehicleSearchInput" class="vehicle-search-input" placeholder="Search by car/bike name, brand, model (e.g. Thar, Creta, Royal Enfield, Ather)..." autocomplete="off">
+                        <button type="button" id="clearSearchBtn" class="clear-search-btn" title="Clear search">&times;</button>
+                    </div>
                 </div>
-                <div class="fuel-tabs" id="fuelTabs">
-                    <span class="filter-label">Fuel</span>
+
+                <!-- Filters Grid Row -->
+                <div class="filters-grid-row">
+                    <!-- Vehicle Type Filter -->
+                    <div class="filter-group">
+                        <span class="filter-label">Vehicle Type</span>
+                        <div class="type-pills">
+                            <button type="button" class="type-filter-btn active" data-filter="all">All</button>
+                            <button type="button" class="type-filter-btn" data-filter="CAR">&#128663; Cars</button>
+                            <button type="button" class="type-filter-btn" data-filter="BIKE">&#128690; Bikes</button>
+                        </div>
+                    </div>
+
+                    <!-- Fuel Type Filter -->
+                    <div class="filter-group">
+                        <span class="filter-label">Fuel Type</span>
+                        <select id="fuelFilterSelect" class="filter-select">
+                            <option value="all">All Fuel Types</option>
+                            <option value="petrol">Petrol</option>
+                            <option value="diesel">Diesel</option>
+                            <option value="electric">Electric (EV)</option>
+                            <option value="cng">CNG</option>
+                        </select>
+                    </div>
+
+                    <!-- Seating Capacity Filter -->
+                    <div class="filter-group">
+                        <span class="filter-label">Seating</span>
+                        <select id="seatFilterSelect" class="filter-select">
+                            <option value="all">Any Seats</option>
+                            <option value="2">2 Seater (Bikes &amp; Compact)</option>
+                            <option value="4">4 Seater (Hatchback/Coupe)</option>
+                            <option value="5">5+ Seater (SUV / Sedan)</option>
+                        </select>
+                    </div>
+
+                    <!-- Max Price Range Filter -->
+                    <div class="filter-group price-slider-wrap">
+                        <div class="price-slider-header">
+                            <span class="filter-label">Max Price</span>
+                            <span id="priceRangeDisplay" style="color:#00d2ff; font-weight:700; font-size:12px;">Up to &#8377;30/km</span>
+                        </div>
+                        <input type="range" id="priceRangeSlider" class="price-slider" min="3" max="30" value="30" step="1">
+                    </div>
+
+                    <!-- Sort By Option -->
+                    <div class="filter-group">
+                        <span class="filter-label">Sort By</span>
+                        <select id="sortBySelect" class="filter-select">
+                            <option value="recommended">Recommended</option>
+                            <option value="price_asc">Price: Low to High</option>
+                            <option value="price_desc">Price: High to Low</option>
+                            <option value="rating">Highest Rated</option>
+                            <option value="trips">Most Booked</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Status & Reset Bar -->
+                <div class="filter-status-bar">
+                    <div class="results-count" id="resultsCountBadge"><%= vehicles.length %> Vehicles Available</div>
+                    <button type="button" id="resetFiltersBtn" class="btn-reset-filters">&#8635; Reset Filters</button>
                 </div>
             </div>
 
+            <!-- Vehicles Grid -->
             <div class="vehicles-grid">
                 <% vehicles.forEach(function(v) { %>
-                    <div class="vehicle-card" data-type="<%= v.type %>" data-fuel="<%= v.fuelType %>">
+                    <div class="vehicle-card" 
+                         data-type="<%= v.type %>" 
+                         data-fuel="<%= v.fuelType %>"
+                         data-seats="<%= v.seatingCapacity %>"
+                         data-price="<%= v.pricePerKm != null ? v.pricePerKm : 0 %>"
+                         data-rating="<%= v.rating || 4.9 %>"
+                         data-trips="<%= v.tripsCount || 50 %>">
                         <div class="vehicle-img" style="<%= (v.imageUrl) ? 'padding:0;' : '' %>">
                             <% if (v.imageUrl) { %>
                                 <img src="<%= v.imageUrl %>" alt="<%= v.company %> <%= v.model %>" style="width:100%;height:190px;object-fit:cover;">
@@ -157,6 +227,13 @@
                         </div>
                     </div>
                 <% }); %>
+            </div>
+
+            <!-- No Results State -->
+            <div id="noResultsBox" class="no-results-state" style="display:none;">
+                <h3>&#128683; No vehicles match your criteria</h3>
+                <p>Try searching for a different keyword or adjusting your filters and price range.</p>
+                <button type="button" class="btn btn-primary" onclick="resetSearchAndFilters()">Show All Vehicles</button>
             </div>
         <% } else { %>
             <div class="empty-vehicles">
@@ -241,7 +318,7 @@
                     </div>
                     <p style="color:#ddd; font-style:italic; margin-bottom:15px; font-size:14px; line-height:1.6;">"<%= fb.comments %>"</p>
                     <div style="font-weight:600; color:#00d2ff; font-size:13px;"><%= fb.userName %></div>
-                    <div style="color:#777; font-size:11px;"><%= fb.category %> &bull; <%= new Date(fb.createdAt).toLocaleDateString() %></div>
+                    <div style="color:#777; font-size:11px;"><%= fb.category || 'Ride Review' %> &bull; <%= fb.tripTime || (fb.createdAt ? new Date(fb.createdAt).toLocaleDateString() : 'Recent') %></div>
                 </div>
             <% }); %>
         </div>

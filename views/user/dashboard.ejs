@@ -33,7 +33,15 @@
                 <div class="user-meta">
                     <div class="user-name"><%= user.fullName || 'Rider' %></div>
                     <div class="user-email"><%= user.email %></div>
-                    <span class="user-role-badge">Verified Member</span>
+                    <% if (user.emailVerified) { %>
+                        <span class="user-role-badge" style="background: rgba(16, 185, 129, 0.2); color: #10b981; border: 1px solid #10b981;">
+                            &#10004; Email Verified
+                        </span>
+                    <% } else { %>
+                        <a href="/account/settings" class="user-role-badge" style="background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid #ef4444; text-decoration: none;">
+                            &#9888; Verify Email
+                        </a>
+                    <% } %>
                 </div>
             </div>
 
@@ -163,26 +171,75 @@
 
                 <!-- DIRECT FLEET & CARS SECTION -->
                 <section id="fleet-section">
-                    <div class="fleet-section-header">
+                    <div class="fleet-section-header" style="flex-direction: column; align-items: stretch; gap: 16px;">
                         <div>
                             <div class="section-title">
                                 <span>&#128663;</span>
                                 <span>Available Cars &amp; Bikes</span>
                             </div>
-                            <div class="section-subtitle">Click "Proceed to Booking" to select dates and apply your 10% first ride discount.</div>
+                            <div class="section-subtitle">Search, filter and book with instant 10% first ride discount.</div>
                         </div>
 
-                        <div class="filters-bar">
-                            <button type="button" class="filter-btn active" data-type="all" onclick="filterDashboardVehicles('all', this)">All</button>
-                            <button type="button" class="filter-btn" data-type="CAR" onclick="filterDashboardVehicles('CAR', this)">Cars</button>
-                            <button type="button" class="filter-btn" data-type="BIKE" onclick="filterDashboardVehicles('BIKE', this)">Bikes</button>
+                        <!-- DASHBOARD SEARCH & FILTER BAR -->
+                        <div style="background: #141829; border: 1px solid #2a3454; border-radius: 12px; padding: 18px; display: flex; flex-direction: column; gap: 14px;">
+                            <div style="position: relative;">
+                                <input type="text" id="dashSearchInput" placeholder="Search by model, brand, vehicle number (e.g. Thar, Creta, MT-15, Ather)..." 
+                                       style="width: 100%; padding: 12px 16px 12px 42px; background: #0b0f19; border: 1px solid #2a3454; border-radius: 8px; color: #fff; font-size: 14px; outline: none;"
+                                       oninput="applyDashboardFilters()">
+                                <span style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #00d2ff;">&#128269;</span>
+                            </div>
+
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; align-items: center;">
+                                <div>
+                                    <label style="display:block; font-size:11px; color:#888; text-transform:uppercase; margin-bottom:4px; font-weight:700;">Vehicle Type</label>
+                                    <div class="filters-bar" style="margin:0;">
+                                        <button type="button" class="filter-btn dash-type-btn active" data-type="all" onclick="setDashType('all', this)">All</button>
+                                        <button type="button" class="filter-btn dash-type-btn" data-type="CAR" onclick="setDashType('CAR', this)">Cars</button>
+                                        <button type="button" class="filter-btn dash-type-btn" data-type="BIKE" onclick="setDashType('BIKE', this)">Bikes</button>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label style="display:block; font-size:11px; color:#888; text-transform:uppercase; margin-bottom:4px; font-weight:700;">Fuel Type</label>
+                                    <select id="dashFuelSelect" onchange="applyDashboardFilters()" style="width:100%; background:#0b0f19; border:1px solid #2a3454; color:#fff; padding:9px 12px; border-radius:8px; font-size:13px; outline:none;">
+                                        <option value="all">All Fuels</option>
+                                        <option value="petrol">Petrol</option>
+                                        <option value="diesel">Diesel</option>
+                                        <option value="electric">Electric</option>
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label style="display:block; font-size:11px; color:#888; text-transform:uppercase; margin-bottom:4px; font-weight:700;">Seating</label>
+                                    <select id="dashSeatSelect" onchange="applyDashboardFilters()" style="width:100%; background:#0b0f19; border:1px solid #2a3454; color:#fff; padding:9px 12px; border-radius:8px; font-size:13px; outline:none;">
+                                        <option value="all">Any Seats</option>
+                                        <option value="2">2 Seater</option>
+                                        <option value="4">4 Seater</option>
+                                        <option value="5">5+ Seater</option>
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <div style="display:flex; justify-content:space-between; font-size:11px; color:#888; text-transform:uppercase; margin-bottom:4px; font-weight:700;">
+                                        <span>Max Price</span>
+                                        <span id="dashPriceVal" style="color:#00d2ff;">&#8377;30/km</span>
+                                    </div>
+                                    <input type="range" id="dashPriceSlider" min="3" max="30" value="30" oninput="document.getElementById('dashPriceVal').textContent = '₹' + this.value + '/km'; applyDashboardFilters();" style="width:100%; accent-color:#00d2ff; cursor:pointer;">
+                                </div>
+                            </div>
                         </div>
                     </div>
 
                     <% if (vehicles && vehicles.length > 0) { %>
-                        <div class="vehicles-grid" id="dashboardVehiclesGrid">
+                        <div class="vehicles-grid" id="dashboardVehiclesGrid" style="margin-top: 20px;">
                             <% vehicles.forEach(function(v) { %>
-                                <div class="vehicle-card" data-type="<%= v.type %>" data-fuel="<%= v.fuelType %>">
+                                <div class="vehicle-card" 
+                                     data-type="<%= v.type %>" 
+                                     data-fuel="<%= v.fuelType %>"
+                                     data-seats="<%= v.seatingCapacity %>"
+                                     data-price="<%= v.pricePerKm != null ? v.pricePerKm : 0 %>"
+                                     data-rating="<%= v.rating || 4.9 %>"
+                                     data-trips="<%= v.tripsCount || 50 %>">
                                     <div class="vehicle-img" style="<%= (v.imageUrl) ? 'padding:0;' : '' %>">
                                         <span class="vehicle-type-tag <%= v.type === 'CAR' ? 'tag-car' : 'tag-bike' %>">
                                             <%= v.type %>
@@ -230,6 +287,11 @@
                                     </div>
                                 </div>
                             <% }); %>
+                        </div>
+
+                        <div id="dashNoResults" style="display:none; text-align:center; padding: 40px 20px; background: #1a1a2e; border-radius: 12px; border: 1px dashed #2a2a4a; margin-top: 20px;">
+                            <p style="color: #888; margin-bottom: 12px;">No vehicles found matching your search and filter criteria.</p>
+                            <button type="button" class="filter-btn active" onclick="resetDashFilters()">Reset Filters</button>
                         </div>
                     <% } else { %>
                         <div style="text-align: center; padding: 40px; background: #1a1a2e; border-radius: 12px; border: 1px solid #2a2a4a; margin-bottom: 40px;">
@@ -434,22 +496,66 @@
         }
         setRating(5);
 
-        // Filter vehicles on dashboard
-        function filterDashboardVehicles(type, btn) {
-            document.querySelectorAll('.filters-bar .filter-btn').forEach(function(b) {
-                b.classList.remove('active');
+        var dashCurrentType = 'all';
+
+        function setDashType(type, btn) {
+            dashCurrentType = type;
+            document.querySelectorAll('.dash-type-btn').forEach(function(b) {
+                b.classList.toggle('active', b === btn);
             });
-            btn.classList.add('active');
+            applyDashboardFilters();
+        }
+
+        function applyDashboardFilters() {
+            var q = (document.getElementById('dashSearchInput').value || '').trim().toLowerCase();
+            var fuel = (document.getElementById('dashFuelSelect').value || 'all').toLowerCase();
+            var seat = document.getElementById('dashSeatSelect').value || 'all';
+            var maxPrice = parseFloat(document.getElementById('dashPriceSlider').value) || 999;
 
             var cards = document.querySelectorAll('#dashboardVehiclesGrid .vehicle-card');
+            var visible = 0;
+
             cards.forEach(function(card) {
-                var cardType = card.getAttribute('data-type');
-                if (type === 'all' || cardType === type) {
+                var cType = (card.getAttribute('data-type') || '').toLowerCase();
+                var cFuel = (card.getAttribute('data-fuel') || '').toLowerCase();
+                var cSeat = parseInt(card.getAttribute('data-seats') || '0', 10);
+                var cPrice = parseFloat(card.getAttribute('data-price') || '0');
+                var text = (card.textContent || '').toLowerCase();
+
+                var matchQ = !q || text.includes(q);
+                var matchType = dashCurrentType === 'all' || cType === dashCurrentType.toLowerCase();
+                var matchFuel = fuel === 'all' || cFuel === fuel;
+                var matchSeat = seat === 'all' ||
+                                (seat === '2' && cSeat === 2) ||
+                                (seat === '4' && cSeat === 4) ||
+                                (seat === '5' && cSeat >= 5);
+                var matchPrice = isNaN(cPrice) || cPrice === 0 || cPrice <= maxPrice;
+
+                if (matchQ && matchType && matchFuel && matchSeat && matchPrice) {
                     card.classList.remove('hidden');
+                    card.style.display = 'flex';
+                    visible++;
                 } else {
                     card.classList.add('hidden');
+                    card.style.display = 'none';
                 }
             });
+
+            var noRes = document.getElementById('dashNoResults');
+            if (noRes) noRes.style.display = visible === 0 ? 'block' : 'none';
+        }
+
+        function resetDashFilters() {
+            document.getElementById('dashSearchInput').value = '';
+            document.getElementById('dashFuelSelect').value = 'all';
+            document.getElementById('dashSeatSelect').value = 'all';
+            document.getElementById('dashPriceSlider').value = '30';
+            document.getElementById('dashPriceVal').textContent = '₹30/km';
+            dashCurrentType = 'all';
+            document.querySelectorAll('.dash-type-btn').forEach(function(b) {
+                b.classList.toggle('active', b.getAttribute('data-type') === 'all');
+            });
+            applyDashboardFilters();
         }
 
         // Copy coupon code

@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book Vehicle - Car &amp; Bike Rental</title>
+    <link rel="stylesheet" th:href="@{/css/payment.css}" href="/css/payment.css">
+</head>
+<body>
+
+    <nav class="navbar">
+        <a th:href="@{/}" href="/" class="navbar-brand">CARBIKE <span>Rental</span></a>
+        <div class="nav-right">
+            <a th:href="@{/user/dashboard}" href="/user/dashboard" class="nav-link btn-home">Dashboard</a>
+            <a th:href="@{/}" href="/" class="nav-link btn-home">Back to Vehicles</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="page-header">
+            <h1>Book Vehicle</h1>
+            <p>Select your dates and estimated KM, then send your booking request for approval.</p>
+            <div th:if="${isFirstRide}" style="background: rgba(16,185,129,0.15); border: 1px solid #10b981; color: #10b981; padding: 12px 18px; border-radius: 10px; margin-top: 15px; font-weight: 600; display: inline-flex; align-items: center; gap: 8px;">
+                <span>&#127881;</span>
+                <span>New Rider Welcome Offer: <strong>10% OFF</strong> automatically applied to this booking!</span>
+            </div>
+        </div>
+
+        <div class="booking-grid">
+            <!-- Vehicle Summary -->
+            <div class="vehicle-summary">
+                <h3>Vehicle Details</h3>
+
+                <div class="summary-img" th:style="${vehicle.imageUrl != null and vehicle.imageUrl != ''} ? 'padding:0;' : ''">
+                    <img th:if="${vehicle.imageUrl != null and vehicle.imageUrl != ''}" th:src="${vehicle.imageUrl}" th:alt="${vehicle.company} + ' ' + ${vehicle.model}">
+                    <span th:if="${vehicle.imageUrl == null or vehicle.imageUrl == ''}" th:utext="${vehicle.type == 'CAR'} ? '&#128663;' : '&#128690;'">&#128663;</span>
+                </div>
+
+                <div class="summary-row">
+                    <span class="summary-label">Vehicle</span>
+                    <span class="summary-value" th:text="${vehicle.company} + ' ' + ${vehicle.model}">Vehicle Name</span>
+                </div>
+                <div class="summary-row">
+                    <span class="summary-label">Type</span>
+                    <span class="summary-value" th:text="${vehicle.type}">CAR</span>
+                </div>
+                <div class="summary-row">
+                    <span class="summary-label">Fuel</span>
+                    <span class="summary-value" th:text="${vehicle.fuelType}">Petrol</span>
+                </div>
+                <div class="summary-row">
+                    <span class="summary-label">Seats</span>
+                    <span class="summary-value" th:text="${vehicle.seatingCapacity} + ' Seats'">4 Seats</span>
+                </div>
+                <div class="summary-row">
+                    <span class="summary-label">Price Per KM</span>
+                    <span class="summary-value" th:text="'₹' + ${#numbers.formatDecimal(vehicle.pricePerKm != null ? vehicle.pricePerKm : 0, 0, 0)} + ' / km'">₹15 / km</span>
+                </div>
+            </div>
+
+            <!-- Booking Request Form -->
+            <div class="payment-form">
+                <h3>Booking Details</h3>
+
+                <form th:action="@{'/booking/' + ${vehicle.id}}" action="/booking" method="post" id="bookingForm">
+                    <div class="form-group">
+                        <label>Booking For</label>
+                        <input type="text" th:value="${user != null ? user.fullName : ''}" readonly style="color:#00d2ff; font-weight:600;">
+                    </div>
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="text" th:value="${user != null ? user.email : ''}" readonly>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>&#128197; Start Date</label>
+                            <input type="date" id="startDate" name="startDate" required>
+                        </div>
+                        <div class="form-group">
+                            <label>&#128197; End Date</label>
+                            <input type="date" id="endDate" name="endDate" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>&#128207; Estimated Kilometers</label>
+                        <input type="number" id="estimatedKm" name="estimatedKm" placeholder="e.g. 150" min="1" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Promo Code</label>
+                        <input type="text" id="promoCode" name="promoCode" th:value="${isFirstRide ? 'FIRST10' : ''}" placeholder="Promo code (e.g. FIRST10)">
+                    </div>
+
+                    <button type="submit" class="btn-pay" id="bookBtn">
+                        Book Now
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">&copy; 2026 Car &amp; Bike Rental. All rights reserved.</div>
+</body>
+</html>

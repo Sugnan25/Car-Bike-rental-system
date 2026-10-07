@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Vehicles - Admin</title>
+    <link rel="stylesheet" th:href="@{/css/admin-vehicles.css}" href="/css/admin-vehicles.css">
+</head>
+<body>
+
+    <nav class="navbar">
+        <a th:href="@{/admin}" href="/admin" class="navbar-brand">CARBIKE <span>Admin</span></a>
+        <div class="nav-right">
+            <a th:href="@{/admin/dashboard}" href="/admin/dashboard" class="nav-link btn-back">Dashboard</a>
+            <a th:href="@{/admin/vehicles/add}" href="/admin/vehicles/add" class="nav-link btn-add">+ Add Vehicle</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="header">
+            <div>
+                <h1>Fleet Management</h1>
+                <p>Add new vehicles or update availability and per-km pricing.</p>
+            </div>
+            <div style="display:flex; gap:10px;">
+                <a th:href="@{/admin/vehicles/add}" href="/admin/vehicles/add" class="btn btn-primary">+ Add New Vehicle</a>
+            </div>
+        </div>
+
+        <div class="table-wrap" th:if="${vehicles != null and !#lists.isEmpty(vehicles)}">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Vehicle</th>
+                        <th>Type</th>
+                        <th>Fuel</th>
+                        <th>Seats</th>
+                        <th>Rate/KM</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="v : ${vehicles}">
+                        <td>
+                            <strong th:text="${v.company} + ' ' + ${v.model}">Mahindra Thar</strong>
+                            <div style="font-size:12px; color:#888;" th:text="${v.vehicleNumber}">KA-01-1234</div>
+                        </td>
+                        <td><span class="badge badge-car" th:text="${v.type}">CAR</span></td>
+                        <td th:text="${v.fuelType}">Petrol</td>
+                        <td th:text="${v.seatingCapacity}">4</td>
+                        <td><strong th:text="'₹' + ${#numbers.formatDecimal(v.pricePerKm != null ? v.pricePerKm : 0, 0, 0)}">₹15</strong></td>
+                        <td><span class="badge badge-available">Available</span></td>
+                        <td>
+                            <a th:href="@{'/admin/vehicles/edit/' + ${v.id}}" class="btn-edit">Edit</a>
+                            <a th:href="@{'/admin/vehicles/delete/' + ${v.id}}" class="btn-delete" onclick="return confirm('Delete vehicle?')">Delete</a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="footer">&copy; 2026 Car &amp; Bike Rental Admin Panel</div>
+</body>
+</html>

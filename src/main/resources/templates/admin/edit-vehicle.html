@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Vehicle - Admin</title>
+    <link rel="stylesheet" th:href="@{/css/admin-edit-vehicle.css}" href="/css/admin-edit-vehicle.css">
+</head>
+<body>
+
+    <nav class="navbar">
+        <a th:href="@{/admin}" href="/admin" class="navbar-brand">CARBIKE <span>Admin</span></a>
+        <div class="nav-right">
+            <a th:href="@{/admin/vehicles}" href="/admin/vehicles" class="nav-link btn-back">Back to Vehicles</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="form-card">
+            <h1>Edit Vehicle</h1>
+            <form th:action="@{/admin/vehicles/update}" action="/admin/vehicles/update" method="post">
+                <input type="hidden" name="id" th:value="${vehicle != null ? vehicle.id : ''}">
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Brand / Company</label>
+                        <input type="text" name="company" th:value="${vehicle != null ? vehicle.company : ''}" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Model Name</label>
+                        <input type="text" name="model" th:value="${vehicle != null ? vehicle.model : ''}" required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Vehicle Plate Number</label>
+                        <input type="text" name="vehicleNumber" th:value="${vehicle != null ? vehicle.vehicleNumber : ''}" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Price Per Kilometer (₹)</label>
+                        <input type="number" name="pricePerKm" th:value="${vehicle != null ? vehicle.pricePerKm : 10}" step="0.5" required>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-save">Update Vehicle</button>
+                    <a th:href="@{/admin/vehicles}" href="/admin/vehicles" class="btn btn-cancel">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="footer">&copy; 2026 Car &amp; Bike Rental Admin Panel</div>
+</body>
+</html>

@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Vehicle - Admin</title>
+    <link rel="stylesheet" th:href="@{/css/admin-add-vehicle.css}" href="/css/admin-add-vehicle.css">
+</head>
+<body>
+
+    <nav class="navbar">
+        <a th:href="@{/admin}" href="/admin" class="navbar-brand">CARBIKE <span>Admin</span></a>
+        <div class="nav-right">
+            <a th:href="@{/admin/vehicles}" href="/admin/vehicles" class="nav-link btn-back">Back to Vehicles</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="form-card">
+            <h1>Add New Vehicle</h1>
+            <p class="subtitle">Fill in details to add a new car or bike to the fleet inventory.</p>
+
+            <form th:action="@{/admin/vehicles/save}" action="/admin/vehicles/save" method="post">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Vehicle Type</label>
+                        <select name="type" required>
+                            <option value="CAR">Car</option>
+                            <option value="BIKE">Bike</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Fuel Type</label>
+                        <select name="fuelType" required>
+                            <option value="PETROL">Petrol</option>
+                            <option value="DIESEL">Diesel</option>
+                            <option value="ELECTRIC">Electric (EV)</option>
+                            <option value="CNG">CNG</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Brand / Company</label>
+                        <input type="text" name="company" placeholder="e.g. Mahindra, Hyundai, Royal Enfield" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Model Name</label>
+                        <input type="text" name="model" placeholder="e.g. Thar 4x4, Classic 350" required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Vehicle Plate Number</label>
+                        <input type="text" name="vehicleNumber" placeholder="e.g. KA-01-TH-2024" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Seating Capacity</label>
+                        <input type="number" name="seatingCapacity" min="1" max="10" value="4" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Price Per Kilometer (₹)</label>
+                    <input type="number" name="pricePerKm" min="1" step="0.5" placeholder="e.g. 15" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Description &amp; Highlights</label>
+                    <textarea name="description" placeholder="Vehicle features, AC, transmission, condition..."></textarea>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-save">Save Vehicle</button>
+                    <a th:href="@{/admin/vehicles}" href="/admin/vehicles" class="btn btn-cancel">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="footer">&copy; 2026 Car &amp; Bike Rental Admin Panel</div>
+</body>
+</html>

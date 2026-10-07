@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Bookings - Car &amp; Bike Rental</title>
+    <link rel="stylesheet" th:href="@{/css/user-bookings.css}" href="/css/user-bookings.css">
+</head>
+<body>
+
+    <nav class="navbar">
+        <a th:href="@{/}" href="/" class="navbar-brand">CARBIKE <span>Rental</span></a>
+        <div class="nav-right">
+            <a th:href="@{/user/dashboard}" href="/user/dashboard" class="nav-link btn-home">Dashboard</a>
+            <a th:href="@{/vehicles}" href="/vehicles" class="nav-link btn-home">Browse Fleet</a>
+            <form th:action="@{/logout}" action="/logout" method="post" style="display:inline;">
+                <button type="submit" class="nav-link btn-primary" style="border:none; cursor:pointer; background:none; font:inherit;">Logout</button>
+            </form>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="header">
+            <div>
+                <h1>My Bookings</h1>
+                <p>View your rental requests, approvals, and active bookings.</p>
+            </div>
+            <a th:href="@{/vehicles}" href="/vehicles" class="btn btn-primary">+ New Booking</a>
+        </div>
+
+        <div class="table-wrap" th:if="${bookings != null and !#lists.isEmpty(bookings)}">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Booking ID</th>
+                        <th>Vehicle</th>
+                        <th>Type</th>
+                        <th>Start Date</th>
+                        <th>End Date</th>
+                        <th>Distance</th>
+                        <th>Total Amount</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="b : ${bookings}">
+                        <td><strong th:text="${#strings.substring(b.id, 0, 8)}">B12345</strong></td>
+                        <td th:text="${b.vehicleName}">Mahindra Thar</td>
+                        <td><span class="badge badge-bike" th:text="${b.vehicleType}">CAR</span></td>
+                        <td th:text="${b.startDate}">2026-10-10</td>
+                        <td th:text="${b.endDate}">2026-10-12</td>
+                        <td th:text="${b.estimatedKm} + ' km'">150 km</td>
+                        <td><strong th:text="'₹' + ${#numbers.formatDecimal(b.totalAmount != null ? b.totalAmount : 0, 0, 0)}">₹2,700</strong></td>
+                        <td>
+                            <span class="badge" 
+                                  th:classappend="${b.status == 'PAID' or b.status == 'ACCEPTED'} ? 'badge-accepted' : (${b.status == 'REJECTED'} ? 'badge-rejected' : 'badge-pending')"
+                                  th:text="${b.status}">PENDING</span>
+                        </td>
+                        <td>
+                            <a th:if="${b.status == 'ACCEPTED'}" th:href="@{'/booking/pay/' + ${b.id}}" class="btn-action btn-pay">&#128179; Pay Now</a>
+                            <a th:if="${b.status != 'PAID'}" th:href="@{'/my-bookings/delete/' + ${b.id}}" class="btn-action btn-delete" onclick="return confirm('Cancel booking?')">Cancel</a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="empty-state" th:if="${bookings == null or #lists.isEmpty(bookings)}">
+            <h3>No Bookings Yet</h3>
+            <p>You haven't made any vehicle bookings. Explore our fleet and book your dream ride today!</p>
+            <a th:href="@{/vehicles}" href="/vehicles" class="btn btn-primary">Browse Vehicles</a>
+        </div>
+    </div>
+
+    <div class="footer">&copy; 2026 Car &amp; Bike Rental. All rights reserved.</div>
+</body>
+</html>

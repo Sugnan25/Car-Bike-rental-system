@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Car &amp; Bike Rental - Ride Your Dream</title>
+    <link rel="stylesheet" th:href="@{/css/index.css}" href="/css/index.css">
+</head>
+<body>
+
+    <!-- NAVBAR -->
+    <nav class="nav">
+        <a th:href="@{/}" href="/" class="nav-brand">CARBIKE RENTAL</a>
+        
+        <div class="nav-links">
+            <div th:if="${user == null}" style="display: flex; gap: 12px;">
+                <a th:href="@{/login}" href="/login" class="btn-nav-login">Login</a>
+                <a th:href="@{/register}" href="/register" class="btn-nav-register">Register</a>
+            </div>
+            <div th:if="${user != null}" style="display: flex; gap: 12px; align-items: center;">
+                <span class="user-welcome" style="color: white; margin-right: 10px;" th:text="'Hi, ' + ${user.fullName != null ? user.fullName : user.email} + '!'">
+                    Hi, Rider!
+                </span>
+                
+                <a th:if="${user.role == 'ROLE_ADMIN'}" th:href="@{/admin/dashboard}" href="/admin/dashboard" class="btn-nav-login">Admin Panel</a>
+                <a th:if="${user.role != 'ROLE_ADMIN'}" th:href="@{/user/dashboard}" href="/user/dashboard" class="btn-nav-login">My Dashboard</a>
+                
+                <form th:action="@{/logout}" action="/logout" method="post" style="display: inline;">
+                    <button type="submit" class="btn-nav-register" style="background: transparent; border: 1px solid white; color: white; cursor: pointer; padding: 8px 18px; border-radius: 8px;">Logout</button>
+                </form>
+            </div>
+        </div>
+    </nav>
+
+    <!-- HERO -->
+    <div class="hero">
+        <div class="hero-content">
+            <span class="hero-badge">&#127775; Limited Time Offer - 20% OFF on First Ride</span>
+            <h1>Ride Your Dream,<br>Rent with Ease</h1>
+            <p>Book premium cars and bikes at unbeatable prices. Flexible plans, zero hidden charges, and a fleet of 50+ vehicles waiting for you.</p>
+            <div class="hero-buttons">
+                <a th:if="${user == null}" th:href="@{/register}" href="/register" class="btn btn-primary">Get Started Free</a>
+                <a th:if="${user != null}" th:href="@{/user/dashboard}" href="/user/dashboard" class="btn btn-primary">Go to Dashboard</a>
+                <a href="#vehicles" class="btn btn-outline">Browse Vehicles</a>
+            </div>
+            <div class="hero-stats">
+                <div class="stat">
+                    <div class="stat-num">50+</div>
+                    <div class="stat-label">Vehicles</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-num">500+</div>
+                    <div class="stat-label">Happy Riders</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-num">4.8&#9733;</div>
+                    <div class="stat-label">Rating</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- OFFERS BANNER -->
+    <div class="offers-banner">
+        <div class="offers-grid">
+            <div class="offer-card">
+                <div class="offer-icon">&#128663;</div>
+                <div class="offer-text">
+                    <h3>Weekend Special</h3>
+                    <p>Rent any car this Saturday &amp; Sunday at flat 30% off.</p>
+                    <span class="offer-tag">VALID TILL SUNDAY</span>
+                </div>
+            </div>
+            <div class="offer-card">
+                <div class="offer-icon">&#128176;</div>
+                <div class="offer-text">
+                    <h3>First Ride Free</h3>
+                    <p>New users get their first bike ride free up to 10 km.</p>
+                    <span class="offer-tag">NEW USERS</span>
+                </div>
+            </div>
+            <div class="offer-card">
+                <div class="offer-icon">&#127873;</div>
+                <div class="offer-text">
+                    <h3>Refer &amp; Earn</h3>
+                    <p>Refer a friend and both get &#8377;200 rental credit.</p>
+                    <span class="offer-tag">EARN &#8377;200</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- VEHICLES -->
+    <section class="vehicles-section" id="vehicles">
+        <div class="section-header">
+            <div class="badge">Our Fleet</div>
+            <h2>Available Vehicles</h2>
+            <p>Browse our collection of cars and bikes. Click "Proceed to Booking" to reserve yours.</p>
+        </div>
+
+        <!-- ADVANCED SEARCH & MULTI-FILTER BAR -->
+        <div class="search-filter-box">
+            <!-- Search Input Row -->
+            <div class="search-bar-row">
+                <div class="search-input-wrap">
+                    <span class="search-icon">&#128269;</span>
+                    <input type="text" id="vehicleSearchInput" class="vehicle-search-input" placeholder="Search by car/bike name, brand, model (e.g. Thar, Creta, Royal Enfield, Ather)..." autocomplete="off">
+                    <button type="button" id="clearSearchBtn" class="clear-search-btn" title="Clear search">&times;</button>
+                </div>
+            </div>
+
+            <!-- Filters Grid Row -->
+            <div class="filters-grid-row">
+                <!-- Vehicle Type Filter -->
+                <div class="filter-group">
+                    <span class="filter-label">Vehicle Type</span>
+                    <div class="type-pills">
+                        <button type="button" class="type-filter-btn active" data-filter="all">All</button>
+                        <button type="button" class="type-filter-btn" data-filter="CAR">&#128663; Cars</button>
+                        <button type="button" class="type-filter-btn" data-filter="BIKE">&#128690; Bikes</button>
+                    </div>
+                </div>
+
+                <!-- Fuel Type Filter -->
+                <div class="filter-group">
+                    <span class="filter-label">Fuel Type</span>
+                    <select id="fuelFilterSelect" class="filter-select">
+                        <option value="all">All Fuel Types</option>
+                        <option value="petrol">Petrol</option>
+                        <option value="diesel">Diesel</option>
+                        <option value="electric">Electric (EV)</option>
+                        <option value="cng">CNG</option>
+                    </select>
+                </div>
+
+                <!-- Seating Capacity Filter -->
+                <div class="filter-group">
+                    <span class="filter-label">Seating</span>
+                    <select id="seatFilterSelect" class="filter-select">
+                        <option value="all">Any Seats</option>
+                        <option value="2">2 Seater (Bikes &amp; Compact)</option>
+                        <option value="4">4 Seater (Hatchback/Coupe)</option>
+                        <option value="5">5+ Seater (SUV / Sedan)</option>
+                    </select>
+                </div>
+
+                <!-- Max Price Range Filter -->
+                <div class="filter-group price-slider-wrap">
+                    <div class="price-slider-header">
+                        <span class="filter-label">Max Price</span>
+                        <span id="priceRangeDisplay" style="color:#00d2ff; font-weight:700; font-size:12px;">Up to &#8377;30/km</span>
+                    </div>
+                    <input type="range" id="priceRangeSlider" class="price-slider" min="3" max="30" value="30" step="1">
+                </div>
+
+                <!-- Sort By Option -->
+                <div class="filter-group">
+                    <span class="filter-label">Sort By</span>
+                    <select id="sortBySelect" class="filter-select">
+                        <option value="recommended">Recommended</option>
+                        <option value="price_asc">Price: Low to High</option>
+                        <option value="price_desc">Price: High to Low</option>
+                        <option value="rating">Highest Rated</option>
+                        <option value="trips">Most Booked</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Status & Reset Bar -->
+            <div class="filter-status-bar">
+                <div class="results-count" id="resultsCountBadge" th:text="${vehicles != null ? #lists.size(vehicles) : 0} + ' Vehicles Available'">6 Vehicles Available</div>
+                <button type="button" id="resetFiltersBtn" class="btn-reset-filters">&#8635; Reset Filters</button>
+            </div>
+        </div>
+
+        <!-- Vehicles Grid -->
+        <div class="vehicles-grid" th:if="${vehicles != null and !#lists.isEmpty(vehicles)}">
+            <div th:each="v : ${vehicles}" class="vehicle-card" 
+                 th:attr="data-type=${v.type},data-fuel=${v.fuelType},data-seats=${v.seatingCapacity},data-price=${v.pricePerKm != null ? v.pricePerKm : 0},data-rating=${v.rating != null ? v.rating : 4.9},data-trips=${v.tripsCount != null ? v.tripsCount : 50}">
+                <div class="vehicle-img" th:style="${v.imageUrl != null and v.imageUrl != ''} ? 'padding:0;' : ''">
+                    <img th:if="${v.imageUrl != null and v.imageUrl != ''}" th:src="${v.imageUrl}" th:alt="${v.company} + ' ' + ${v.model}" style="width:100%;height:190px;object-fit:cover;">
+                    <span th:if="${v.imageUrl == null or v.imageUrl == ''}" th:utext="${v.type == 'CAR'} ? '&#128663;' : '&#128690;'">&#128663;</span>
+                </div>
+                <div class="vehicle-body">
+                    <span class="vehicle-type" th:classappend="${v.type == 'CAR'} ? 'type-car' : 'type-bike'" th:text="${v.type}">
+                        CAR
+                    </span>
+                    <h3 th:text="${v.model}">Model Name</h3>
+                    <div class="vehicle-company" th:text="${v.company}">Company</div>
+                    <div class="vehicle-details">
+                        <span class="vehicle-detail">&#9981; <span th:text="${v.fuelType}">Petrol</span></span>
+                        <span class="vehicle-detail">&#128101; <span th:text="${v.seatingCapacity}">4</span> Seats</span>
+                        <span class="vehicle-detail" th:if="${v.vehicleNumber != null and v.vehicleNumber != ''}">&#128203; <span th:text="${v.vehicleNumber}">KA-01-1234</span></span>
+                    </div>
+                    <div class="vehicle-price">
+                        <span class="price" th:text="'₹' + ${#numbers.formatDecimal(v.pricePerKm != null ? v.pricePerKm : 0, 0, 0)}">₹15</span>
+                        <span class="per">/ km</span>
+                    </div>
+                    <div class="vehicle-actions">
+                        <a th:if="${user != null}" th:href="@{'/booking/' + ${v.id}}" class="btn-billing">Proceed to Booking</a>
+                        <a th:if="${user == null}" th:href="@{/login}" class="btn-billing">Login to Book</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- No Results State -->
+        <div id="noResultsBox" class="no-results-state" style="display:none;">
+            <h3>&#128683; No vehicles match your criteria</h3>
+            <p>Try searching for a different keyword or adjusting your filters and price range.</p>
+            <button type="button" class="btn btn-primary" onclick="resetSearchAndFilters()">Show All Vehicles</button>
+        </div>
+    </section>
+
+    <!-- FEATURES -->
+    <section class="features-section">
+        <div class="section-header">
+            <div class="badge">Why Us</div>
+            <h2>Why Choose CarBike Rental?</h2>
+            <p>We make renting vehicles simple, affordable, and reliable.</p>
+        </div>
+        <div class="features-grid">
+            <div class="feature-card">
+                <span class="feature-icon">&#128663;</span>
+                <h3>Premium Fleet</h3>
+                <p>Well-maintained cars and bikes from top brands, ready for you.</p>
+            </div>
+            <div class="feature-card">
+                <span class="feature-icon">&#128176;</span>
+                <h3>Transparent Pricing</h3>
+                <p>No hidden fees. What you see is what you pay, every time.</p>
+            </div>
+            <div class="feature-card">
+                <span class="feature-icon">&#9889;</span>
+                <h3>Instant Booking</h3>
+                <p>Book in seconds. No paperwork, no waiting, no hassle.</p>
+            </div>
+            <div class="feature-card">
+                <span class="feature-icon">&#128737;</span>
+                <h3>24/7 Support</h3>
+                <p>Round-the-clock customer support for a smooth experience.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <div class="footer">
+        &copy; 2026 Car &amp; Bike Rental. All rights reserved.
+    </div>
+
+    <script th:src="@{/js/vehicle-filter.js}" src="/js/vehicle-filter.js"></script>
+</body>
+</html>

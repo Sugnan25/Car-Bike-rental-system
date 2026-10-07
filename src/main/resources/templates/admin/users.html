@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Customers - Admin</title>
+    <link rel="stylesheet" th:href="@{/css/admin-users.css}" href="/css/admin-users.css">
+</head>
+<body>
+
+    <nav class="navbar">
+        <a th:href="@{/admin}" href="/admin" class="navbar-brand">CARBIKE <span>Admin</span></a>
+        <div class="nav-right">
+            <a th:href="@{/admin/dashboard}" href="/admin/dashboard" class="nav-link btn-back">Dashboard</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="header">
+            <div>
+                <h1>Registered Customers</h1>
+                <p>View verified members and rider accounts.</p>
+            </div>
+        </div>
+
+        <div class="table-wrap" th:if="${users != null and !#lists.isEmpty(users)}">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Customer</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        <th>Role</th>
+                        <th>Email Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="u : ${users}">
+                        <td><strong th:text="${u.fullName != null ? u.fullName : 'Rider'}">John Doe</strong></td>
+                        <td th:text="${u.email}">john@email.com</td>
+                        <td th:text="${u.phone}">9876543210</td>
+                        <td><span class="badge badge-admin" th:text="${u.role}">ROLE_USER</span></td>
+                        <td>
+                            <span th:if="${u.emailVerified}" class="badge badge-enabled">Verified</span>
+                            <span th:if="${!u.emailVerified}" class="badge badge-disabled">Unverified</span>
+                        </td>
+                        <td>
+                            <a th:if="${u.email != 'admin@gmail.com'}" th:href="@{'/admin/users/delete/' + ${u.id}}" class="btn-delete" onclick="return confirm('Delete user?')">Delete</a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="footer">&copy; 2026 Car &amp; Bike Rental Admin Panel</div>
+</body>
+</html>

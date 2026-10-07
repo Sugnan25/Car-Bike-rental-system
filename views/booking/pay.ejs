@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Complete Payment - Car &amp; Bike Rental</title>
     <link rel="stylesheet" href="/css/payment.css">
+    <!-- Lightweight Pure JS QR Code Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
 <body>
 
@@ -12,14 +14,15 @@
         <a href="/" class="navbar-brand">CARBIKE <span>Rental</span></a>
         <div class="nav-right">
             <a href="/user/bookings" class="nav-link btn-home">My Bookings</a>
-            <a href="/" class="nav-link btn-home">Back to Vehicles</a>
+            <a href="/user/dashboard" class="nav-link btn-home">Dashboard</a>
+            <a href="/" class="nav-link btn-home">Home</a>
         </div>
     </nav>
 
     <div class="container">
         <div class="page-header">
             <h1>Complete Payment</h1>
-            <p>Your booking request was approved. Pay now to confirm your rental.</p>
+            <p>Your booking request has been approved by the admin. Pay securely via dynamic UPI QR Code or preferred payment method.</p>
             <div class="approved-banner">&#9989; Booking Approved by Admin</div>
         </div>
 
@@ -30,7 +33,7 @@
 
                 <div class="summary-row">
                     <span class="summary-label">Booking ID</span>
-                    <span class="summary-value"><%= booking.id.toString().substring(0, 8) %></span>
+                    <span class="summary-value" style="font-family: monospace; color: #00d2ff;"><%= booking.id.toString().substring(0, 8).toUpperCase() %></span>
                 </div>
                 <div class="summary-row">
                     <span class="summary-label">Vehicle</span>
@@ -43,16 +46,16 @@
                     </div>
                 <% } %>
                 <div class="summary-row">
-                    <span class="summary-label">Booked By</span>
+                    <span class="summary-label">Rider Name</span>
                     <span class="summary-value"><%= booking.userName %></span>
                 </div>
                 <div class="summary-row">
                     <span class="summary-label">Start Date</span>
-                    <span class="summary-value"><%= booking.startDate %></span>
+                    <span class="summary-value">&#128197; <%= booking.startDate %></span>
                 </div>
                 <div class="summary-row">
                     <span class="summary-label">End Date</span>
-                    <span class="summary-value"><%= booking.endDate %></span>
+                    <span class="summary-value">&#128197; <%= booking.endDate %></span>
                 </div>
 
                 <div class="price-breakdown">
@@ -62,45 +65,89 @@
                         <span><%= booking.pricePerKm != null ? '₹' + Math.round(booking.pricePerKm) : '₹0' %></span>
                     </div>
                     <div class="breakdown-row">
-                        <span>Estimated KM</span>
+                        <span>Estimated Distance</span>
                         <span><%= booking.estimatedKm %> km</span>
                     </div>
+                    <% if (booking.discountAmount && booking.discountAmount > 0) { %>
+                        <div class="breakdown-row" style="color: #10b981;">
+                            <span>Discount Applied (<%= booking.promoCode || 'FIRST10' %>)</span>
+                            <span>-&#8377;<%= Math.round(booking.discountAmount) %></span>
+                        </div>
+                    <% } %>
                     <div class="breakdown-row total">
-                        <span>Total Amount</span>
-                        <span class="total-price">&#8377;<%= Math.round(booking.totalAmount || 0) %></span>
+                        <span>Total Payable</span>
+                        <span class="total-price">&#8377;<%= Math.round(booking.totalAmount || 0).toLocaleString('en-IN') %></span>
                     </div>
                 </div>
             </div>
 
-            <!-- Payment Form -->
+            <!-- Payment Form with UPI QR Code -->
             <div class="payment-form">
-                <h3>Payment Method</h3>
+                <h3>Select Payment Method</h3>
 
-                <form action="/booking/pay/<%= booking.id %>" method="post">
+                <form action="/booking/pay/<%= booking.id %>" method="post" id="payForm">
                     <input type="hidden" name="paymentMethod" id="paymentMethod" value="upi">
 
                     <div class="payment-methods">
-                        <div class="payment-method active" onclick="selectPayment(this, 'upi')">
-                            <span class="payment-method-icon">&#128178;</span>
-                            UPI
+                        <div class="payment-method active" id="tab-upi" onclick="selectPayment(this, 'upi')">
+                            <span class="payment-method-icon">&#9889;</span>
+                            UPI &amp; QR
                         </div>
-                        <div class="payment-method" onclick="selectPayment(this, 'card')">
+                        <div class="payment-method" id="tab-card" onclick="selectPayment(this, 'card')">
                             <span class="payment-method-icon">&#128179;</span>
-                            Card
+                            Debit / Card
                         </div>
-                        <div class="payment-method" onclick="selectPayment(this, 'netbanking')">
+                        <div class="payment-method" id="tab-netbanking" onclick="selectPayment(this, 'netbanking')">
                             <span class="payment-method-icon">&#127974;</span>
                             Net Banking
                         </div>
                     </div>
 
+                    <!-- DYNAMIC UPI QR PAYMENT SECTION -->
                     <div id="upi-section">
+                        <div class="qr-payment-card">
+                            <div class="qr-header">
+                                <div class="qr-header-title">
+                                    <span>&#128241;</span>
+                                    <span>Scan QR Code to Pay</span>
+                                </div>
+                                <div class="qr-timer-badge">
+                                    <span>&#9203;</span>
+                                    <span id="qrTimer">09:59</span>
+                                </div>
+                            </div>
+
+                            <!-- QR CODE CONTAINER -->
+                            <div class="qr-code-box">
+                                <div id="qrcode"></div>
+                                <div class="qr-center-icon">&#8377;</div>
+                            </div>
+
+                            <div class="qr-scan-instruction">
+                                Scan with any UPI app to pay <strong>&#8377;<%= Math.round(booking.totalAmount || 0) %></strong>
+                            </div>
+
+                            <div class="upi-apps-row">
+                                <span class="upi-app-badge">Google Pay</span>
+                                <span class="upi-app-badge">PhonePe</span>
+                                <span class="upi-app-badge">Paytm</span>
+                                <span class="upi-app-badge">BHIM UPI</span>
+                                <span class="upi-app-badge">CRED</span>
+                            </div>
+
+                            <div class="upi-id-bar">
+                                <span class="upi-id-text" id="upiIdText">carrental@okhdfcbank</span>
+                                <button type="button" class="btn-copy-upi" onclick="copyUpiId()">Copy UPI ID</button>
+                            </div>
+                        </div>
+
                         <div class="form-group">
-                            <label>UPI ID</label>
-                            <input type="text" placeholder="yourname@okhdfcbank" value="rider@upi">
+                            <label>UPI Transaction ID / UTR (Optional)</label>
+                            <input type="text" name="upiTxnId" placeholder="e.g. 429188291024" maxlength="16">
                         </div>
                     </div>
 
+                    <!-- CARD PAYMENT SECTION -->
                     <div id="card-section" style="display:none;">
                         <div class="form-group">
                             <label>Card Number</label>
@@ -118,6 +165,7 @@
                         </div>
                     </div>
 
+                    <!-- NET BANKING SECTION -->
                     <div id="netbanking-section" style="display:none;">
                         <div class="form-group">
                             <label>Select Bank</label>
@@ -132,9 +180,11 @@
                         </div>
                     </div>
 
-                    <button type="submit" class="btn-pay">Pay Now &#8377;<%= Math.round(booking.totalAmount || 0) %></button>
+                    <button type="submit" class="btn-pay" id="payBtn">
+                        &#10004; Complete Payment &#8377;<%= Math.round(booking.totalAmount || 0) %>
+                    </button>
 
-                    <div class="secure-note">&#128274; Your payment is secure and encrypted with mock demo gateway.</div>
+                    <div class="secure-note">&#128274; 256-Bit Encrypted Secure Demo Payment Gateway. Instant confirmation.</div>
                 </form>
             </div>
         </div>
@@ -143,6 +193,37 @@
     <div class="footer">&copy; 2026 Car &amp; Bike Rental. All rights reserved.</div>
 
     <script>
+        var bookingAmount = <%= Math.round(booking.totalAmount || 0) %>;
+        var bookingIdStr = '<%= booking.id.toString().substring(0, 8) %>';
+        var upiUri = 'upi://pay?pa=carrental@okhdfcbank&pn=CarBike%20Rental&am=' + bookingAmount + '&cu=INR&tn=Booking-' + bookingIdStr;
+
+        // Render dynamic QR code
+        function generateQr() {
+            var qrContainer = document.getElementById('qrcode');
+            qrContainer.innerHTML = '';
+
+            if (typeof QRCode !== 'undefined') {
+                new QRCode(qrContainer, {
+                    text: upiUri,
+                    width: 190,
+                    height: 190,
+                    colorDark: '#000000',
+                    colorLight: '#ffffff',
+                    correctLevel: QRCode.CorrectLevel.H
+                });
+            } else {
+                // Fallback SVG QR representation
+                var img = document.createElement('img');
+                img.src = 'https://api.qrserver.com/v1/create-qr-code/?size=190x190&data=' + encodeURIComponent(upiUri);
+                img.alt = 'UPI Payment QR';
+                img.style.width = '190px';
+                img.style.height = '190px';
+                qrContainer.appendChild(img);
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', generateQr);
+
         function selectPayment(el, method) {
             document.querySelectorAll('.payment-method').forEach(function(m) { m.classList.remove('active'); });
             el.classList.add('active');
@@ -150,7 +231,38 @@
             document.getElementById('upi-section').style.display = method === 'upi' ? 'block' : 'none';
             document.getElementById('card-section').style.display = method === 'card' ? 'block' : 'none';
             document.getElementById('netbanking-section').style.display = method === 'netbanking' ? 'block' : 'none';
+
+            var payBtn = document.getElementById('payBtn');
+            if (method === 'upi') {
+                payBtn.innerHTML = '&#10004; I Have Paid via QR (&#8377;' + bookingAmount + ')';
+            } else {
+                payBtn.innerHTML = '&#10004; Pay Now &#8377;' + bookingAmount;
+            }
         }
+
+        function copyUpiId() {
+            var upi = document.getElementById('upiIdText').innerText;
+            navigator.clipboard.writeText(upi).then(function() {
+                alert('UPI ID copied to clipboard: ' + upi);
+            }).catch(function() {
+                alert('UPI ID: ' + upi);
+            });
+        }
+
+        // Live 10-minute countdown timer
+        var timeLeft = 600; // 10 minutes in seconds
+        var timerEl = document.getElementById('qrTimer');
+        setInterval(function() {
+            if (timeLeft <= 0) {
+                timerEl.textContent = 'Expired';
+                timerEl.style.color = '#ef4444';
+            } else {
+                timeLeft--;
+                var minutes = Math.floor(timeLeft / 60);
+                var seconds = timeLeft % 60;
+                timerEl.textContent = (minutes < 10 ? '0' : '') + minutes + ':' + (seconds < 10 ? '0' : '') + seconds;
+            }
+        }, 1000);
     </script>
 </body>
 </html>

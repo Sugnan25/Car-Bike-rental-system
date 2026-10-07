@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Account Settings - Car &amp; Bike Rental</title>
+    <link rel="stylesheet" th:href="@{/css/user-settings.css}" href="/css/user-settings.css">
+</head>
+<body>
+
+    <nav class="navbar">
+        <a th:href="@{/}" href="/" class="navbar-brand">CARBIKE <span>Rental</span></a>
+        <div class="nav-right">
+            <a th:href="@{/user/dashboard}" href="/user/dashboard" class="nav-link btn-home">Dashboard</a>
+            <a th:href="@{/my-bookings}" href="/my-bookings" class="nav-link btn-home">My Bookings</a>
+            <form th:action="@{/logout}" action="/logout" method="post" style="display:inline;">
+                <button type="submit" class="nav-link btn-primary" style="border:none; cursor:pointer; background:none; font:inherit;">Logout</button>
+            </form>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="page-header">
+            <h1>Account Settings</h1>
+            <p>Update your profile details and manage email verification.</p>
+        </div>
+
+        <div class="settings-card">
+            <form th:action="@{/account/settings}" action="/account/settings" method="post">
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" name="fullName" th:value="${user != null ? user.fullName : ''}" required>
+                </div>
+
+                <div class="form-group">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 7px;">
+                        <label style="margin: 0;">Email Address</label>
+                        <span th:if="${user != null and user.emailVerified}" style="display: inline-flex; align-items: center; gap: 4px; background: rgba(16, 185, 129, 0.15); border: 1px solid #10b981; color: #10b981; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 700;">
+                            &#10004; Verified
+                        </span>
+                        <a th:if="${user != null and !user.emailVerified}" th:href="@{'/verify-email?email=' + ${user.email}}" style="background: rgba(0, 210, 255, 0.15); border: 1px solid #00d2ff; color: #00d2ff; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 700; text-decoration: none;">
+                            Verify Email Now &rarr;
+                        </a>
+                    </div>
+                    <input type="email" th:value="${user != null ? user.email : ''}" readonly class="readonly">
+                </div>
+
+                <div class="form-group">
+                    <label>Phone Number</label>
+                    <input type="text" name="phone" th:value="${user != null ? user.phone : ''}" required>
+                </div>
+
+                <div class="section-divider">
+                    <span>Change Password</span>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>New Password</label>
+                        <input type="password" name="newPassword" placeholder="New password">
+                    </div>
+                    <div class="form-group">
+                        <label>Confirm New Password</label>
+                        <input type="password" name="confirmPassword" placeholder="Confirm password">
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn-save">Save Changes</button>
+                    <a th:href="@{/user/dashboard}" href="/user/dashboard" class="btn-cancel">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="footer">&copy; 2026 Car &amp; Bike Rental. All rights reserved.</div>
+</body>
+</html>

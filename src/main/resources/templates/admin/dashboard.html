@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Car &amp; Bike Rental</title>
+    <link rel="stylesheet" th:href="@{/css/admin-dashboard.css}" href="/css/admin-dashboard.css">
+</head>
+<body>
+
+    <nav class="navbar">
+        <a th:href="@{/admin}" href="/admin" class="navbar-brand">CARBIKE <span>Admin</span></a>
+        <div class="nav-right">
+            <a th:href="@{/}" href="/" class="nav-link btn-back">Main Website</a>
+            <form th:action="@{/logout}" action="/logout" method="post" style="display:inline;">
+                <button type="submit" class="nav-link btn-logout" style="border:none; cursor:pointer; background:none; font:inherit;">Logout</button>
+            </form>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="dashboard-header">
+            <h1>Admin Control Panel</h1>
+            <p>Manage vehicles, bookings, registered users, and customer reviews.</p>
+        </div>
+
+        <div class="cards-grid">
+            <a th:href="@{/admin/vehicles}" href="/admin/vehicles" class="card">
+                <div class="card-icon icon-blue">&#128663;</div>
+                <div class="card-body">
+                    <h3>Fleet Management</h3>
+                    <p>Add, edit, or remove vehicles from the rental inventory.</p>
+                </div>
+                <div class="card-footer">
+                    <span class="btn-card">Manage Vehicles &rarr;</span>
+                </div>
+            </a>
+
+            <a th:href="@{/admin/bookings}" href="/admin/bookings" class="card">
+                <div class="card-icon icon-green">&#128203;</div>
+                <div class="card-body">
+                    <h3>Booking Requests</h3>
+                    <p>Review customer booking requests and grant approvals.</p>
+                </div>
+                <div class="card-footer">
+                    <span class="btn-card">View Bookings &rarr;</span>
+                </div>
+            </a>
+
+            <a th:href="@{/admin/users}" href="/admin/users" class="card">
+                <div class="card-icon icon-purple">&#128101;</div>
+                <div class="card-body">
+                    <h3>Customer Directory</h3>
+                    <p>Manage registered riders and verified member accounts.</p>
+                </div>
+                <div class="card-footer">
+                    <span class="btn-card">View Customers &rarr;</span>
+                </div>
+            </a>
+
+            <a th:href="@{/admin/feedbacks}" href="/admin/feedbacks" class="card">
+                <div class="card-icon icon-orange">&#128172;</div>
+                <div class="card-body">
+                    <h3>Customer Reviews</h3>
+                    <p>Monitor ratings and feedback submitted by verified riders.</p>
+                </div>
+                <div class="card-footer">
+                    <span class="btn-card">View Reviews &rarr;</span>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <div class="footer">&copy; 2026 Car &amp; Bike Rental Admin Panel</div>
+</body>
+</html>

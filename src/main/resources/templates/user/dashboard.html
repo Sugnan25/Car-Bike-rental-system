@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Dashboard - Car &amp; Bike Rental</title>
+    <link rel="stylesheet" th:href="@{/css/user-dashboard.css}" href="/css/user-dashboard.css">
+</head>
+<body>
+
+    <!-- NAVBAR -->
+    <nav class="navbar">
+        <a th:href="@{/}" href="/" class="navbar-brand">CARBIKE <span>Rental</span></a>
+        <div class="nav-right">
+            <span style="color: #bbb; font-size: 14px; margin-right: 8px;" th:text="'Hi, ' + ${user.fullName != null ? user.fullName : 'Rider'}">Hi, User</span>
+            <a th:href="@{/}" href="/" class="nav-link btn-home">Home</a>
+            
+            <form th:action="@{/logout}" action="/logout" method="post" style="display: inline;">
+                <button type="submit" class="nav-link btn-primary" style="border: none; cursor: pointer; background: none; font: inherit;">Logout</button>
+            </form>
+        </div>
+    </nav>
+
+    <!-- DASHBOARD WITH SIDEBAR & 2-COLUMN MAIN CONTENT -->
+    <div class="dashboard-layout">
+        
+        <!-- LEFT SIDEBAR -->
+        <aside class="sidebar">
+            <div class="user-profile-widget">
+                <div class="user-avatar" th:text="${#strings.substring(user.fullName != null ? user.fullName : (user.email != null ? user.email : 'U'), 0, 1)}">
+                    U
+                </div>
+                <div class="user-meta">
+                    <div class="user-name" th:text="${user.fullName != null ? user.fullName : 'Rider'}">Rider</div>
+                    <div class="user-email" th:text="${user.email}">rider@gmail.com</div>
+                    <span th:if="${user.emailVerified}" class="user-role-badge" style="background: rgba(16, 185, 129, 0.2); color: #10b981; border: 1px solid #10b981;">
+                        &#10004; Email Verified
+                    </span>
+                    <a th:if="${!user.emailVerified}" th:href="@{/account/settings}" class="user-role-badge" style="background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid #ef4444; text-decoration: none;">
+                        &#9888; Verify Email
+                    </a>
+                </div>
+            </div>
+
+            <div class="sidebar-title">Quick Menu</div>
+            <nav class="sidebar-nav">
+                <a th:href="@{/vehicles}" href="/vehicles" class="nav-item active">
+                    <div class="nav-item-left">
+                        <span class="icon">&#128663;</span>
+                        <span>Browse Fleet</span>
+                    </div>
+                    <span class="badge-count" th:text="${vehicles != null ? #lists.size(vehicles) : 0}">6</span>
+                </a>
+
+                <a th:href="@{/my-bookings}" href="/my-bookings" class="nav-item">
+                    <div class="nav-item-left">
+                        <span class="icon">&#128203;</span>
+                        <span>My Bookings</span>
+                    </div>
+                    <span class="badge-count" style="background:#10b981;" th:if="${myBookingsCount != null and myBookingsCount > 0}" th:text="${myBookingsCount}">2</span>
+                </a>
+
+                <a th:href="@{/account/settings}" href="/account/settings" class="nav-item">
+                    <div class="nav-item-left">
+                        <span class="icon">&#9881;</span>
+                        <span>Account Settings</span>
+                    </div>
+                </a>
+
+                <a href="#feedback-section" class="nav-item" onclick="document.getElementById('feedback-section').scrollIntoView({behavior:'smooth'})">
+                    <div class="nav-item-left">
+                        <span class="icon">&#128172;</span>
+                        <span>Give Feedback</span>
+                    </div>
+                </a>
+            </nav>
+
+            <div class="sidebar-bottom">
+                <a th:href="@{/}" href="/" class="nav-item" style="color: #888;">
+                    <div class="nav-item-left">
+                        <span class="icon">&#127968;</span>
+                        <span>Main Website</span>
+                    </div>
+                </a>
+                <form th:action="@{/logout}" action="/logout" method="post" style="width: 100%;">
+                    <button type="submit" class="btn-logout">
+                        <span>&#128682;</span>
+                        <span>Logout</span>
+                    </button>
+                </form>
+            </div>
+        </aside>
+
+        <!-- MAIN WRAPPER -->
+        <div class="main-wrapper">
+            
+            <div class="dashboard-center">
+                
+                <!-- WELCOME BANNER WITH 10% FIRST RIDE OFFER -->
+                <div class="welcome-box">
+                    <h2>Welcome back, <span th:text="${user.fullName != null ? user.fullName : 'Rider'}">Rider</span>!</h2>
+                    <p>Select your favorite car or bike from our fleet below and proceed to booking instantly with transparent pricing and flexible plans.</p>
+                    
+                    <div th:if="${isFirstRide}" class="first-ride-badge-banner">
+                        <span>&#127881;</span>
+                        <span>First Ride Special: Get <strong>10% OFF</strong> automatically applied at checkout with promo code <strong>FIRST10</strong>!</span>
+                    </div>
+                </div>
+
+                <!-- FLEET SECTION -->
+                <section id="fleet-section">
+                    <div class="fleet-section-header" style="flex-direction: column; align-items: stretch; gap: 16px;">
+                        <div>
+                            <div class="section-title">
+                                <span>&#128663;</span>
+                                <span>Available Cars &amp; Bikes</span>
+                            </div>
+                            <div class="section-subtitle">Search, filter and book with instant 10% first ride discount.</div>
+                        </div>
+
+                        <!-- DASHBOARD SEARCH & FILTER BAR -->
+                        <div style="background: #141829; border: 1px solid #2a3454; border-radius: 12px; padding: 18px; display: flex; flex-direction: column; gap: 14px;">
+                            <div style="position: relative;">
+                                <input type="text" id="dashSearchInput" placeholder="Search by model, brand, vehicle number (e.g. Thar, Creta, MT-15, Ather)..." 
+                                       style="width: 100%; padding: 12px 16px 12px 42px; background: #0b0f19; border: 1px solid #2a3454; border-radius: 8px; color: #fff; font-size: 14px; outline: none;">
+                                <span style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #00d2ff;">&#128269;</span>
+                            </div>
+
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; align-items: center;">
+                                <div>
+                                    <label style="display:block; font-size:11px; color:#888; text-transform:uppercase; margin-bottom:4px; font-weight:700;">Vehicle Type</label>
+                                    <div class="filters-bar" style="margin:0;">
+                                        <button type="button" class="filter-btn dash-type-btn active" data-type="all">All</button>
+                                        <button type="button" class="filter-btn dash-type-btn" data-type="CAR">Cars</button>
+                                        <button type="button" class="filter-btn dash-type-btn" data-type="BIKE">Bikes</button>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label style="display:block; font-size:11px; color:#888; text-transform:uppercase; margin-bottom:4px; font-weight:700;">Fuel Type</label>
+                                    <select id="dashFuelSelect" style="width:100%; background:#0b0f19; border:1px solid #2a3454; color:#fff; padding:9px 12px; border-radius:8px; font-size:13px; outline:none;">
+                                        <option value="all">All Fuels</option>
+                                        <option value="petrol">Petrol</option>
+                                        <option value="diesel">Diesel</option>
+                                        <option value="electric">Electric</option>
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label style="display:block; font-size:11px; color:#888; text-transform:uppercase; margin-bottom:4px; font-weight:700;">Seating</label>
+                                    <select id="dashSeatSelect" style="width:100%; background:#0b0f19; border:1px solid #2a3454; color:#fff; padding:9px 12px; border-radius:8px; font-size:13px; outline:none;">
+                                        <option value="all">Any Seats</option>
+                                        <option value="2">2 Seater</option>
+                                        <option value="4">4 Seater</option>
+                                        <option value="5">5+ Seater</option>
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <div style="display:flex; justify-content:space-between; font-size:11px; color:#888; text-transform:uppercase; margin-bottom:4px; font-weight:700;">
+                                        <span>Max Price</span>
+                                        <span id="dashPriceVal" style="color:#00d2ff;">&#8377;30/km</span>
+                                    </div>
+                                    <input type="range" id="dashPriceSlider" min="3" max="30" value="30" style="width:100%; accent-color:#00d2ff; cursor:pointer;">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="vehicles-grid" id="dashboardVehiclesGrid" style="margin-top: 20px;" th:if="${vehicles != null and !#lists.isEmpty(vehicles)}">
+                        <div th:each="v : ${vehicles}" class="vehicle-card" 
+                             th:attr="data-type=${v.type},data-fuel=${v.fuelType},data-seats=${v.seatingCapacity},data-price=${v.pricePerKm != null ? v.pricePerKm : 0},data-rating=${v.rating != null ? v.rating : 4.9},data-trips=${v.tripsCount != null ? v.tripsCount : 50}">
+                            <div class="vehicle-img" th:style="${v.imageUrl != null and v.imageUrl != ''} ? 'padding:0;' : ''">
+                                <span class="vehicle-type-tag" th:classappend="${v.type == 'CAR'} ? 'tag-car' : 'tag-bike'" th:text="${v.type}">
+                                    CAR
+                                </span>
+                                <div class="vehicle-rating-badge">
+                                    <span>&#9733;</span>
+                                    <span th:text="${v.rating != null ? v.rating : '4.9'}">4.9</span>
+                                </div>
+                                <img th:if="${v.imageUrl != null and v.imageUrl != ''}" th:src="${v.imageUrl}" th:alt="${v.company} + ' ' + ${v.model}">
+                                <span th:if="${v.imageUrl == null or v.imageUrl == ''}" th:utext="${v.type == 'CAR'} ? '&#128663;' : '&#128690;'">&#128663;</span>
+                            </div>
+
+                            <div class="vehicle-body">
+                                <div class="vehicle-title" th:text="${v.model}">Model</div>
+                                <div class="vehicle-company" th:text="${v.company}">Company</div>
+
+                                <div class="vehicle-specs">
+                                    <div class="spec-item">
+                                        <span>&#9981;</span>
+                                        <span th:text="${v.fuelType}">Petrol</span>
+                                    </div>
+                                    <div class="spec-item">
+                                        <span>&#128101;</span>
+                                        <span th:text="${v.seatingCapacity} + ' Seats'">4 Seats</span>
+                                    </div>
+                                </div>
+
+                                <div class="vehicle-footer">
+                                    <div class="vehicle-price">
+                                        <span th:text="'₹' + ${#numbers.formatDecimal(v.pricePerKm != null ? v.pricePerKm : 0, 0, 0)}">₹15</span>
+                                        <span>/ km</span>
+                                    </div>
+                                    <a th:href="@{'/booking/' + ${v.id}}" class="btn-book">Proceed to Booking &rarr;</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- FEEDBACK FORM -->
+                <section class="feedback-box" id="feedback-section" style="margin-top: 30px;">
+                    <div class="section-title">
+                        <span>&#128172;</span>
+                        <span>Share Your Ride Experience</span>
+                    </div>
+                    <form th:action="@{/user/feedback}" action="/user/feedback" method="post" class="feedback-form" style="margin-top: 15px;">
+                        <input type="hidden" name="rating" value="5">
+                        <label style="display:block; font-size:13px; color:#bbb; margin-bottom:8px; font-weight:600;">Category</label>
+                        <select name="category" required>
+                            <option value="Vehicle Condition & Performance">Vehicle Condition &amp; Performance</option>
+                            <option value="Booking & Reservation Process">Booking &amp; Reservation Process</option>
+                            <option value="Pricing & Value">Pricing &amp; Value</option>
+                        </select>
+                        <label style="display:block; font-size:13px; color:#bbb; margin-bottom:8px; font-weight:600;">Your Review / Suggestions</label>
+                        <textarea name="comments" placeholder="Write your review here..." required></textarea>
+                        <button type="submit" class="btn-feedback">&#128640; Submit Review</button>
+                    </form>
+                </section>
+            </div>
+
+            <!-- RIGHT PANEL -->
+            <aside class="dashboard-right">
+                <div class="promo-widget">
+                    <div class="promo-widget-title">
+                        <span>&#127873;</span>
+                        <span>Promotions &amp; Coupons</span>
+                    </div>
+                    <div class="promo-card-item featured">
+                        <span class="promo-tag tag-green">NEW RIDER SPECIAL</span>
+                        <div class="promo-name">10% OFF First Ride</div>
+                        <div class="promo-desc">Use coupon code FIRST10 on checkout!</div>
+                    </div>
+                </div>
+            </aside>
+        </div>
+    </div>
+
+    <div class="footer">&copy; 2026 Car &amp; Bike Rental. All rights reserved.</div>
+</body>
+</html>
