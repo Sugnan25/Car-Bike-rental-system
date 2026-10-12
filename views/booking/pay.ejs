@@ -242,10 +242,23 @@
 
         function copyUpiId() {
             var upi = document.getElementById('upiIdText').innerText;
+            var btn = document.querySelector('.btn-copy-upi');
             navigator.clipboard.writeText(upi).then(function() {
-                alert('UPI ID copied to clipboard: ' + upi);
+                if (btn) {
+                    var oldText = btn.textContent;
+                    btn.textContent = '✔ Copied!';
+                    btn.style.background = '#10b981';
+                    btn.style.color = '#fff';
+                    setTimeout(function() {
+                        btn.textContent = oldText;
+                        btn.style.background = '';
+                        btn.style.color = '';
+                    }, 2000);
+                }
             }).catch(function() {
-                alert('UPI ID: ' + upi);
+                if (btn) {
+                    btn.textContent = 'Copied: ' + upi;
+                }
             });
         }
 

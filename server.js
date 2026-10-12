@@ -26,7 +26,64 @@ let usersCollection = null;
 let vehiclesCollection = null;
 let bookingsCollection = null;
 let feedbacksCollection = null;
+let otpsCollection = null;
+let settingsCollection = null;
 let gridfsBucket = null;
+
+// Dynamic SMTP configuration
+let mailTransporter = null;
+let currentSmtpConfig = {
+  host: process.env.SMTP_HOST || 'smtp.gmail.com',
+  port: parseInt(process.env.SMTP_PORT) || 587,
+  user: process.env.SMTP_USER || '',
+  pass: process.env.SMTP_PASS || '',
+  from: process.env.SMTP_FROM || 'Car & Bike Rental'
+};
+
+async function initEmailService() {
+  if (process.env.SMTP_USER && process.env.SMTP_PASS) {
+    currentSmtpConfig = {
+      host: process.env.SMTP_HOST || 'smtp.gmail.com',
+      port: parseInt(process.env.SMTP_PORT) || 587,
+      user: process.env.SMTP_USER,
+      pass: process.env.SMTP_PASS,
+      from: process.env.SMTP_FROM || 'Car & Bike Rental'
+    };
+  } else if (settingsCollection) {
+    try {
+      const savedConfig = await settingsCollection.findOne({ key: 'smtp_config' });
+      if (savedConfig && savedConfig.user && savedConfig.pass) {
+        currentSmtpConfig = {
+          host: savedConfig.host || 'smtp.gmail.com',
+          port: parseInt(savedConfig.port) || 587,
+          user: savedConfig.user,
+          pass: savedConfig.pass,
+          from: savedConfig.from || 'Car & Bike Rental'
+        };
+      }
+    } catch (e) {}
+  }
+
+  if (currentSmtpConfig && currentSmtpConfig.user && currentSmtpConfig.pass) {
+    try {
+      mailTransporter = nodemailer.createTransport({
+        host: currentSmtpConfig.host || 'smtp.gmail.com',
+        port: parseInt(currentSmtpConfig.port) || 587,
+        secure: false,
+        auth: {
+          user: currentSmtpConfig.user,
+          pass: currentSmtpConfig.pass
+        }
+      });
+      console.log('[EMAIL SERVICE] SMTP active for:', currentSmtpConfig.user);
+    } catch (e) {
+      console.warn('[EMAIL SERVICE] Failed to initialize SMTP:', e.message);
+      mailTransporter = null;
+    }
+  } else {
+    mailTransporter = null;
+  }
+}
 
 async function initDB() {
   try {
@@ -36,8 +93,12 @@ async function initDB() {
     vehiclesCollection = db.collection('vehicles');
     bookingsCollection = db.collection('bookings');
     feedbacksCollection = db.collection('feedbacks');
+    otpsCollection = db.collection('email_verification_otps');
+    settingsCollection = db.collection('system_settings');
     gridfsBucket = new GridFSBucket(db, { bucketName: 'fs' });
     console.log(`Connected to MongoDB Atlas: database "${DB_NAME}"`);
+
+    await initEmailService();
 
     // Ensure default admin exists if not present
     const adminExists = await usersCollection.findOne({ email: 'admin@gmail.com' });
@@ -50,6 +111,7 @@ async function initDB() {
         role: 'ROLE_ADMIN',
         enabled: true,
         emailVerified: true,
+        _class: 'com.rental.carbikerental.entity.User',
         createdAt: new Date()
       });
       console.log('Default admin verified: admin@gmail.com');
@@ -60,54 +122,125 @@ async function initDB() {
 }
 initDB();
 
-// Nodemailer Transporter Configuration for Real Email Delivery
-let mailTransporter = null;
-if (process.env.SMTP_USER && process.env.SMTP_PASS) {
-  try {
-    mailTransporter = nodemailer.createTransport({
-      host: process.env.SMTP_HOST || 'smtp.gmail.com',
-      port: parseInt(process.env.SMTP_PORT) || 587,
-      secure: process.env.SMTP_SECURE === 'true',
-      auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS
-      }
-    });
-    console.log('[EMAIL SERVICE] SMTP transporter initialized for:', process.env.SMTP_USER);
-  } catch (e) {
-    console.warn('[EMAIL SERVICE] Failed to initialize SMTP:', e.message);
+// Fallback memory OTP store
+const otpStore = new Map();
+
+async function getActiveOtp(email, purpose = 'verify_email') {
+  const cleanEmail = (email || '').trim().toLowerCase();
+  if (otpsCollection) {
+    try {
+      const rec = await otpsCollection.findOne({
+        email: cleanEmail,
+        purpose,
+        verified: false,
+        expiresAt: { $gt: new Date() }
+      });
+      if (rec) return rec;
+    } catch (e) {}
   }
+  const mem = otpStore.get(cleanEmail);
+  if (mem && mem.purpose === purpose && mem.expiresAt > Date.now() && !mem.verified) {
+    return mem;
+  }
+  return null;
+}
+
+async function createOrRefreshOtp(email, purpose = 'verify_email', forcedCode = null) {
+  const cleanEmail = (email || '').trim().toLowerCase();
+  const code = forcedCode || Math.floor(100000 + Math.random() * 900000).toString();
+  const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
+
+  if (otpsCollection) {
+    try {
+      await otpsCollection.updateOne(
+        { email: cleanEmail, purpose },
+        {
+          $set: {
+            email: cleanEmail,
+            purpose,
+            otp: code,
+            verified: false,
+            createdAt: new Date(),
+            expiresAt
+          }
+        },
+        { upsert: true }
+      );
+    } catch (e) {}
+  }
+
+  otpStore.set(cleanEmail, {
+    otp: code,
+    purpose,
+    expiresAt: expiresAt.getTime(),
+    verified: false
+  });
+
+  return { email: cleanEmail, otp: code, purpose, expiresAt };
+}
+
+async function verifyStoredOtp(email, code, purpose = 'verify_email') {
+  const cleanEmail = (email || '').trim().toLowerCase();
+  const cleanCode = (code || '').trim();
+  if (cleanCode === '123456') return true;
+
+  if (otpsCollection) {
+    try {
+      const rec = await otpsCollection.findOne({
+        email: cleanEmail,
+        purpose,
+        otp: cleanCode,
+        expiresAt: { $gt: new Date() }
+      });
+      if (rec) {
+        await otpsCollection.updateOne({ _id: rec._id }, { $set: { verified: true } });
+        return true;
+      }
+    } catch (e) {}
+  }
+
+  const mem = otpStore.get(cleanEmail);
+  if (mem && mem.otp === cleanCode && Date.now() <= mem.expiresAt && (!mem.purpose || mem.purpose === purpose)) {
+    mem.verified = true;
+    return true;
+  }
+
+  return false;
 }
 
 async function sendEmailOtp(toEmail, otp, title = 'Email Verification Code') {
   console.log(`[EMAIL DISPATCH] To: ${toEmail} | OTP Code: ${otp} | Action: ${title}`);
-  if (mailTransporter) {
+  if (!mailTransporter && db) {
+    await initEmailService();
+  }
+
+  if (mailTransporter && currentSmtpConfig && currentSmtpConfig.user && currentSmtpConfig.pass) {
     try {
       await mailTransporter.sendMail({
-        from: process.env.SMTP_FROM || `"CarBike Rental" <${process.env.SMTP_USER}>`,
+        from: `"${currentSmtpConfig.from || 'Car & Bike Rental'}" <${currentSmtpConfig.user}>`,
         to: toEmail,
         subject: `${title} - ${otp}`,
-        text: `Your ${title} is ${otp}. It will expire in 10 minutes.\n\nIf you did not request this, please ignore this email.`,
+        text: `Your ${title} is ${otp}. It will expire in 10 minutes.\n\nIf you did not request this code, please ignore this email.`,
         html: `
-          <div style="font-family: Arial, sans-serif; background: #0f172a; color: #ffffff; padding: 30px; border-radius: 10px; max-width: 500px; margin: 0 auto;">
-            <h2 style="color: #00d2ff; margin-top: 0;">CarBike Rental</h2>
-            <p style="font-size: 15px; color: #cbd5e1;">${title}</p>
-            <div style="background: #1e293b; border: 1px solid #00d2ff; border-radius: 8px; padding: 16px; text-align: center; margin: 25px 0;">
-              <span style="font-size: 32px; font-weight: bold; letter-spacing: 6px; color: #00d2ff;">${otp}</span>
+          <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0f172a; color: #ffffff; padding: 32px; border-radius: 12px; max-width: 500px; margin: 0 auto; border: 1px solid #1e293b;">
+            <div style="font-size: 22px; font-weight: 700; color: #00d2ff; margin-bottom: 8px;">Car &amp; Bike Rental</div>
+            <p style="font-size: 15px; color: #cbd5e1; margin-bottom: 20px;">${title}</p>
+            <div style="background: #1e293b; border: 2px solid #00d2ff; border-radius: 10px; padding: 18px; text-align: center; margin: 25px 0;">
+              <span style="font-size: 34px; font-weight: 800; letter-spacing: 8px; color: #00d2ff;">${otp}</span>
             </div>
-            <p style="font-size: 13px; color: #94a3b8;">This code is valid for 10 minutes. If you did not make this request, you can safely ignore this email.</p>
+            <p style="font-size: 13px; color: #94a3b8; line-height: 1.5;">This code is valid for 10 minutes. If you did not make this request, you can safely ignore this email.</p>
           </div>
         `
       });
-      console.log(`[EMAIL DELIVERED] Email successfully sent to personal inbox: ${toEmail}`);
-      return true;
+      console.log(`[EMAIL DELIVERED] Email successfully dispatched to personal inbox: ${toEmail}`);
+      return { sent: true };
     } catch (err) {
       console.error(`[EMAIL ERROR] Could not deliver to ${toEmail}:`, err.message);
-      return false;
+      return { sent: false, error: err.message };
     }
   } else {
-    console.log(`[EMAIL NOTICE] SMTP credentials not set in .env. Code ${otp} logged and available on screen for testing.`);
-    return false;
+    console.log(`[EMAIL NOTICE] SMTP credentials not active yet. OTP ${otp} stored in MongoDB Atlas.`);
+    return { sent: false, error: 'SMTP offline' };
   }
 }
 
@@ -147,12 +280,29 @@ app.use((req, res, next) => {
   next();
 });
 
-// In-memory OTP storage for fast reliable verification
-const otpStore = new Map();
+// ==========================================
+// EMAIL VERIFICATION & RESEND REST APIS
+// ==========================================
 
-// ==========================================
-// EMAIL VERIFICATION & SEARCH REST APIS
-// ==========================================
+app.post('/api/auth/resend-otp', async (req, res) => {
+  const { email, purpose } = req.body;
+  const cleanEmail = (email || '').trim().toLowerCase();
+  const cleanPurpose = purpose || 'verify_email';
+
+  if (!cleanEmail || !cleanEmail.includes('@')) {
+    return res.status(400).json({ success: false, message: 'Valid email address is required.' });
+  }
+
+  const generated = await createOrRefreshOtp(cleanEmail, cleanPurpose);
+  const result = await sendEmailOtp(cleanEmail, generated.otp, cleanPurpose === 'reset_password' ? 'Password Reset OTP Code' : 'Email Verification OTP Code');
+
+  return res.json({
+    success: true,
+    message: result.sent ? `Verification code sent to ${cleanEmail}` : 'Code regenerated',
+    emailSent: result.sent,
+    demoOtp: generated.otp
+  });
+});
 
 app.post('/api/auth/send-verification-otp', async (req, res) => {
   const { email } = req.body;
@@ -162,21 +312,14 @@ app.post('/api/auth/send-verification-otp', async (req, res) => {
     return res.status(400).json({ success: false, message: 'Valid email address is required.' });
   }
 
-  const generatedOtp = Math.floor(100000 + Math.random() * 900000).toString();
-  const expiresAt = Date.now() + 10 * 60 * 1000; // 10 minutes
-
-  otpStore.set(cleanEmail, {
-    otp: generatedOtp,
-    expiresAt,
-    verified: false
-  });
-
-  await sendEmailOtp(cleanEmail, generatedOtp, 'Email Verification OTP Code');
+  const generated = await createOrRefreshOtp(cleanEmail, 'verify_email');
+  const result = await sendEmailOtp(cleanEmail, generated.otp, 'Email Verification OTP Code');
 
   return res.json({
     success: true,
     message: `Verification code sent to ${cleanEmail}`,
-    demoOtp: generatedOtp // Provided for rapid testing in UI preview
+    emailSent: result.sent,
+    demoOtp: generated.otp
   });
 });
 
@@ -185,33 +328,15 @@ app.post('/api/auth/verify-otp', async (req, res) => {
   const cleanEmail = (email || '').trim().toLowerCase();
   const cleanOtp = (otp || '').trim();
 
-  const record = otpStore.get(cleanEmail);
-  if (!record) {
-    return res.status(400).json({
-      success: false,
-      message: 'No verification code requested for this email. Please request a new code.'
-    });
-  }
-
-  if (Date.now() > record.expiresAt) {
-    otpStore.delete(cleanEmail);
-    return res.status(400).json({
-      success: false,
-      message: 'Verification code has expired. Please request a new one.'
-    });
-  }
-
-  if (record.otp !== cleanOtp && cleanOtp !== '123456') {
+  const isValid = await verifyStoredOtp(cleanEmail, cleanOtp, 'verify_email');
+  if (!isValid) {
     return res.status(400).json({
       success: false,
       message: 'Invalid verification code. Please check and try again.'
     });
   }
 
-  record.verified = true;
-  otpStore.set(cleanEmail, record);
-
-  // If user is logged in or already exists, update their database record
+  // Update in users collection
   if (usersCollection) {
     try {
       await usersCollection.updateOne(
@@ -539,22 +664,23 @@ app.get('/verify-email', async (req, res) => {
   const email = (req.query.email || '').trim().toLowerCase();
   if (!email) return res.redirect('/register');
 
-  let record = otpStore.get(email);
-  if (!record || Date.now() > record.expiresAt) {
-    const generatedOtp = Math.floor(100000 + Math.random() * 900000).toString();
-    record = {
-      otp: generatedOtp,
-      expiresAt: Date.now() + 10 * 60 * 1000,
-      verified: false
-    };
-    otpStore.set(email, record);
-    await sendEmailOtp(email, generatedOtp, 'Email Verification OTP Code');
+  let activeRecord = await getActiveOtp(email, 'verify_email');
+  let emailSentStatus = false;
+
+  if (!activeRecord) {
+    activeRecord = await createOrRefreshOtp(email, 'verify_email');
+    const result = await sendEmailOtp(email, activeRecord.otp, 'Email Verification Code');
+    emailSentStatus = !!result.sent;
+  } else {
+    emailSentStatus = !!(mailTransporter && currentSmtpConfig && currentSmtpConfig.user);
   }
 
   res.render('verify-email', {
     email: email,
-    demoOtp: record.otp,
-    error: req.query.error ? 'Invalid or expired verification code. Please try again.' : null
+    demoOtp: activeRecord ? activeRecord.otp : '123456',
+    emailSent: emailSentStatus,
+    smtpConfigured: !!(mailTransporter && currentSmtpConfig && currentSmtpConfig.user),
+    error: req.query.error ? 'Invalid or expired verification code. Please check and try again.' : null
   });
 });
 
@@ -563,22 +689,17 @@ app.post('/verify-email', async (req, res) => {
   const cleanEmail = (email || '').trim().toLowerCase();
   const cleanOtp = (otp || '').trim();
 
-  const record = otpStore.get(cleanEmail);
-  const isValid = (record && record.otp === cleanOtp && Date.now() <= record.expiresAt) || cleanOtp === '123456';
+  const isValid = await verifyStoredOtp(cleanEmail, cleanOtp, 'verify_email');
 
   if (!isValid) {
-    let demoCode = record ? record.otp : '123456';
+    const active = await getActiveOtp(cleanEmail, 'verify_email');
     return res.render('verify-email', {
       email: cleanEmail,
-      demoOtp: demoCode,
+      demoOtp: active ? active.otp : '123456',
+      emailSent: !!(mailTransporter && currentSmtpConfig && currentSmtpConfig.user),
+      smtpConfigured: !!(mailTransporter && currentSmtpConfig && currentSmtpConfig.user),
       error: 'Invalid or expired verification code. Please check and try again.'
     });
-  }
-
-  // Mark verified in record
-  if (record) {
-    record.verified = true;
-    otpStore.set(cleanEmail, record);
   }
 
   // Update in Database
@@ -616,15 +737,8 @@ app.post('/forgot-password', async (req, res) => {
       });
     }
 
-    const generatedOtp = Math.floor(100000 + Math.random() * 900000).toString();
-    otpStore.set(cleanEmail, {
-      otp: generatedOtp,
-      expiresAt: Date.now() + 10 * 60 * 1000,
-      verified: false,
-      purpose: 'reset_password'
-    });
-
-    await sendEmailOtp(cleanEmail, generatedOtp, 'Password Reset OTP Code');
+    const activeRecord = await createOrRefreshOtp(cleanEmail, 'reset_password');
+    await sendEmailOtp(cleanEmail, activeRecord.otp, 'Password Reset OTP Code');
 
     res.redirect(`/reset-password?email=${encodeURIComponent(cleanEmail)}`);
   } catch (err) {
@@ -633,16 +747,26 @@ app.post('/forgot-password', async (req, res) => {
   }
 });
 
-app.get('/reset-password', (req, res) => {
+app.get('/reset-password', async (req, res) => {
   const email = (req.query.email || '').trim().toLowerCase();
   if (!email) return res.redirect('/forgot-password');
 
-  const record = otpStore.get(email);
-  const demoCode = record ? record.otp : '123456';
+  let activeRecord = await getActiveOtp(email, 'reset_password');
+  let emailSentStatus = false;
+
+  if (!activeRecord) {
+    activeRecord = await createOrRefreshOtp(email, 'reset_password');
+    const result = await sendEmailOtp(email, activeRecord.otp, 'Password Reset OTP Code');
+    emailSentStatus = !!result.sent;
+  } else {
+    emailSentStatus = !!(mailTransporter && currentSmtpConfig && currentSmtpConfig.user);
+  }
 
   res.render('reset-password', {
     email,
-    demoOtp: demoCode,
+    demoOtp: activeRecord ? activeRecord.otp : '123456',
+    emailSent: emailSentStatus,
+    smtpConfigured: !!(mailTransporter && currentSmtpConfig && currentSmtpConfig.user),
     error: req.query.error ? 'Invalid or expired reset code. Please try again.' : null
   });
 });
@@ -653,32 +777,37 @@ app.post('/reset-password', async (req, res) => {
   const cleanOtp = (otp || '').trim();
 
   try {
-    const record = otpStore.get(cleanEmail);
-    const isValidOtp = (record && record.otp === cleanOtp && Date.now() <= record.expiresAt) || cleanOtp === '123456';
+    const isValidOtp = await verifyStoredOtp(cleanEmail, cleanOtp, 'reset_password');
 
     if (!isValidOtp) {
-      const demoCode = record ? record.otp : '123456';
+      const active = await getActiveOtp(cleanEmail, 'reset_password');
       return res.render('reset-password', {
         email: cleanEmail,
-        demoOtp: demoCode,
+        demoOtp: active ? active.otp : '123456',
+        emailSent: !!(mailTransporter && currentSmtpConfig && currentSmtpConfig.user),
+        smtpConfigured: !!(mailTransporter && currentSmtpConfig && currentSmtpConfig.user),
         error: 'Invalid or expired reset code. Please check the code and try again.'
       });
     }
 
     if (!newPassword || newPassword.length < 6) {
-      const demoCode = record ? record.otp : '123456';
+      const active = await getActiveOtp(cleanEmail, 'reset_password');
       return res.render('reset-password', {
         email: cleanEmail,
-        demoOtp: demoCode,
+        demoOtp: active ? active.otp : '123456',
+        emailSent: !!(mailTransporter && currentSmtpConfig && currentSmtpConfig.user),
+        smtpConfigured: !!(mailTransporter && currentSmtpConfig && currentSmtpConfig.user),
         error: 'Password must be at least 6 characters long.'
       });
     }
 
     if (newPassword !== confirmPassword) {
-      const demoCode = record ? record.otp : '123456';
+      const active = await getActiveOtp(cleanEmail, 'reset_password');
       return res.render('reset-password', {
         email: cleanEmail,
-        demoOtp: demoCode,
+        demoOtp: active ? active.otp : '123456',
+        emailSent: !!(mailTransporter && currentSmtpConfig && currentSmtpConfig.user),
+        smtpConfigured: !!(mailTransporter && currentSmtpConfig && currentSmtpConfig.user),
         error: 'Passwords do not match. Please re-enter.'
       });
     }
@@ -692,7 +821,9 @@ app.post('/reset-password', async (req, res) => {
       );
     }
 
-    // Clean up OTP
+    if (otpsCollection) {
+      await otpsCollection.deleteOne({ email: cleanEmail, purpose: 'reset_password' });
+    }
     otpStore.delete(cleanEmail);
 
     res.redirect('/login?reset=true');
@@ -746,14 +877,10 @@ app.post('/login', async (req, res) => {
 
     // Email verification check: if not verified and not admin, prompt OTP verification
     if (user.role !== 'ROLE_ADMIN' && cleanEmail !== 'admin@gmail.com' && user.emailVerified === false) {
-      // Send fresh OTP and redirect to verification page
-      const generatedOtp = Math.floor(100000 + Math.random() * 900000).toString();
-      otpStore.set(cleanEmail, {
-        otp: generatedOtp,
-        expiresAt: Date.now() + 10 * 60 * 1000,
-        verified: false
-      });
-      console.log(`[LOGIN OTP VERIFICATION REQUIRED] Sent OTP to ${cleanEmail}: ${generatedOtp}`);
+      // Create or reuse unexpired OTP and send via email
+      const activeOtp = await createOrRefreshOtp(cleanEmail, 'verify_email');
+      await sendEmailOtp(cleanEmail, activeOtp.otp, 'Email Verification Code');
+      console.log(`[LOGIN OTP VERIFICATION REQUIRED] Verification OTP for ${cleanEmail}: ${activeOtp.otp}`);
       return res.redirect(`/verify-email?email=${encodeURIComponent(cleanEmail)}`);
     }
 
@@ -819,6 +946,7 @@ app.post('/register', async (req, res) => {
         role,
         enabled: true,
         emailVerified: isVerified,
+        _class: 'com.rental.carbikerental.entity.User',
         createdAt: new Date()
       });
 
@@ -826,14 +954,9 @@ app.post('/register', async (req, res) => {
         return res.redirect('/login?registered=true');
       }
 
-      // Generate & send OTP and route user directly to OTP entry screen
-      const generatedOtp = Math.floor(100000 + Math.random() * 900000).toString();
-      otpStore.set(cleanEmail, {
-        otp: generatedOtp,
-        expiresAt: Date.now() + 10 * 60 * 1000,
-        verified: false
-      });
-      await sendEmailOtp(cleanEmail, generatedOtp, 'Email Verification OTP Code');
+      // Generate & store OTP in MongoDB Atlas and dispatch email
+      const activeOtp = await createOrRefreshOtp(cleanEmail, 'verify_email');
+      await sendEmailOtp(cleanEmail, activeOtp.otp, 'Email Verification Code');
 
       res.redirect(`/verify-email?email=${encodeURIComponent(cleanEmail)}`);
   } catch (err) {
@@ -1032,12 +1155,24 @@ app.post('/admin/vehicles/save', requireAdmin, upload.single('imageFile'), async
     const isAvailable = available !== 'false' && available !== false && available !== '0';
 
     let finalImg = imageUrl ? imageUrl.trim() : '';
-    if (req.file && gridfsBucket) {
-      const uploadStream = gridfsBucket.openUploadStream(req.file.originalname, {
-        contentType: req.file.mimetype
-      });
-      uploadStream.end(req.file.buffer);
-      finalImg = '/uploads/' + uploadStream.id.toString();
+    if (req.file && req.file.buffer && gridfsBucket) {
+      try {
+        finalImg = await new Promise((resolve) => {
+          const uploadStream = gridfsBucket.openUploadStream(req.file.originalname || 'vehicle.jpg', {
+            contentType: req.file.mimetype || 'image/jpeg'
+          });
+          uploadStream.on('finish', () => {
+            resolve('/uploads/' + uploadStream.id.toString());
+          });
+          uploadStream.on('error', (err) => {
+            console.error('GridFS upload error:', err);
+            resolve(imageUrl ? imageUrl.trim() : '');
+          });
+          uploadStream.end(req.file.buffer);
+        });
+      } catch (uploadErr) {
+        console.error('Image upload failed:', uploadErr);
+      }
     }
 
     const doc = {
@@ -1055,6 +1190,7 @@ app.post('/admin/vehicles/save', requireAdmin, upload.single('imageFile'), async
       imageUrl: finalImg,
       rating: 5.0,
       tripsCount: 0,
+      _class: 'com.rental.carbikerental.entity.Vehicle',
       createdAt: new Date()
     };
 
@@ -1108,12 +1244,23 @@ app.post('/admin/vehicles/update', requireAdmin, upload.single('imageFile'), asy
       description: description !== undefined ? description.trim() : ''
     };
 
-    if (req.file && gridfsBucket) {
-      const uploadStream = gridfsBucket.openUploadStream(req.file.originalname, {
-        contentType: req.file.mimetype
-      });
-      uploadStream.end(req.file.buffer);
-      updateFields.imageUrl = '/uploads/' + uploadStream.id.toString();
+    if (req.file && req.file.buffer && gridfsBucket) {
+      try {
+        const uploadedUrl = await new Promise((resolve) => {
+          const uploadStream = gridfsBucket.openUploadStream(req.file.originalname || 'vehicle.jpg', {
+            contentType: req.file.mimetype || 'image/jpeg'
+          });
+          uploadStream.on('finish', () => {
+            resolve('/uploads/' + uploadStream.id.toString());
+          });
+          uploadStream.on('error', (err) => {
+            console.error('GridFS upload error:', err);
+            resolve(imageUrl ? imageUrl.trim() : '');
+          });
+          uploadStream.end(req.file.buffer);
+        });
+        if (uploadedUrl) updateFields.imageUrl = uploadedUrl;
+      } catch (err) {}
     } else if (imageUrl !== undefined && imageUrl.trim()) {
       updateFields.imageUrl = imageUrl.trim();
     }
@@ -1126,6 +1273,80 @@ app.post('/admin/vehicles/update', requireAdmin, upload.single('imageFile'), asy
     console.error('Error updating vehicle:', e);
   }
   res.redirect('/admin/vehicles');
+});
+
+// ==========================================
+// ADMIN EMAIL & SMTP SETTINGS
+// ==========================================
+
+app.get('/admin/email-settings', requireAdmin, async (req, res) => {
+  if (!mailTransporter && db) {
+    await initEmailService();
+  }
+  res.render('admin/email-settings', {
+    config: currentSmtpConfig || { host: 'smtp.gmail.com', port: 587, user: '', pass: '', from: 'Car & Bike Rental' },
+    configured: !!(mailTransporter && currentSmtpConfig && currentSmtpConfig.user && currentSmtpConfig.pass),
+    saved: req.query.saved === 'true'
+  });
+});
+
+app.post('/admin/email-settings', requireAdmin, async (req, res) => {
+  const { host, port, user, pass, from } = req.body;
+  currentSmtpConfig = {
+    host: (host || 'smtp.gmail.com').trim(),
+    port: parseInt(port) || 587,
+    secure: false,
+    user: (user || '').trim(),
+    pass: (pass || '').trim(),
+    from: (from || 'Car & Bike Rental').trim()
+  };
+
+  if (settingsCollection) {
+    try {
+      await settingsCollection.updateOne(
+        { key: 'smtp_config' },
+        { $set: { ...currentSmtpConfig, updatedAt: new Date() } },
+        { upsert: true }
+      );
+    } catch (e) {}
+  }
+
+  if (currentSmtpConfig.user && currentSmtpConfig.pass) {
+    try {
+      mailTransporter = nodemailer.createTransport({
+        host: currentSmtpConfig.host,
+        port: currentSmtpConfig.port,
+        secure: false,
+        auth: {
+          user: currentSmtpConfig.user,
+          pass: currentSmtpConfig.pass
+        }
+      });
+      console.log('[EMAIL SERVICE] Saved & reconnected SMTP for:', currentSmtpConfig.user);
+    } catch (err) {
+      console.warn('[EMAIL SERVICE] Reconnect failed:', err.message);
+      mailTransporter = null;
+    }
+  }
+
+  res.redirect('/admin/email-settings?saved=true');
+});
+
+app.post('/admin/email-settings/test', requireAdmin, async (req, res) => {
+  const { email } = req.body;
+  const targetEmail = (email || '').trim().toLowerCase();
+  if (!targetEmail) {
+    return res.status(400).json({ success: false, error: 'Recipient email required' });
+  }
+
+  const testOtp = Math.floor(100000 + Math.random() * 900000).toString();
+  const outcome = await sendEmailOtp(targetEmail, testOtp, 'Car Rental Test Verification Code');
+
+  if (outcome.sent) {
+    return res.json({ success: true, message: `Test email sent to ${targetEmail}` });
+  } else {
+    return res.json({ success: false, error: outcome.error || 'Failed to dispatch email' });
+  }
 });
 
 app.get('/admin/vehicles/delete/:id', requireAdmin, async (req, res) => {
