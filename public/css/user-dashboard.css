@@ -26,10 +26,16 @@ body { font-family: 'Segoe UI', Arial, sans-serif; background: #0f0f0f; color: #
 }
 
 /* LEFT SIDEBAR */
-.sidebar {
-    width: 260px; background: #161b2e; border-right: 1px solid #2a2a4a;
-    padding: 30px 18px; display: flex; flex-direction: column; flex-shrink: 0;
-}
+<div class="dashboard-layout">
+    <!-- Ensure the sidebar element is present here -->
+    <aside class="sidebar">
+        <!-- Sidebar content / navigation links -->
+    </aside>
+
+    <div class="main-wrapper">
+        <!-- Main content -->
+    </div>
+</div>
 
 .user-profile-widget {
     background: rgba(0, 210, 255, 0.05); border: 1px solid rgba(0, 210, 255, 0.15);
