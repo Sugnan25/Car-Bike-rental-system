@@ -93,6 +93,8 @@ body { font-family: 'Segoe UI', Arial, sans-serif; background: #0f0f0f; color: #
 /* MAIN DASHBOARD CONTAINER */
 .main-wrapper {
     flex: 1; display: flex; gap: 30px; padding: 30px; overflow-y: auto;
+    margin-left: 0; /* FIX: Reset any implicit left shifts */
+    width: 100%;
 }
 
 .dashboard-center {
