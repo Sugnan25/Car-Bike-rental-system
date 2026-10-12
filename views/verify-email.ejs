@@ -102,6 +102,9 @@
                     <span>Sent Verification OTP: <strong id="demoCode"><%= demoOtp %></strong></span>
                     <button type="button" class="btn-fill-otp" onclick="autoFill('<%= demoOtp %>')">Auto-Fill OTP</button>
                 </div>
+                <div style="background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.25); border-radius: 6px; padding: 8px 12px; font-size: 12px; color: #fbbf24; margin-bottom: 16px; line-height: 1.4;">
+                    &#9432; If not received in your personal mail inbox, click <strong>Auto-Fill OTP</strong> above or use <strong>123456</strong>.
+                </div>
             <% } %>
 
             <form action="/verify-email" method="post" id="verifyForm">

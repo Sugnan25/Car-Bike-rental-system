@@ -136,7 +136,7 @@
                             </div>
 
                             <div class="upi-id-bar">
-                                <span class="upi-id-text" id="upiIdText">carrental@okhdfcbank</span>
+                                <span class="upi-id-text" id="upiIdText">9141814934@naviaxis</span>
                                 <button type="button" class="btn-copy-upi" onclick="copyUpiId()">Copy UPI ID</button>
                             </div>
                         </div>
@@ -195,7 +195,7 @@
     <script>
         var bookingAmount = <%= Math.round(booking.totalAmount || 0) %>;
         var bookingIdStr = '<%= booking.id.toString().substring(0, 8) %>';
-        var upiUri = 'upi://pay?pa=carrental@okhdfcbank&pn=CarBike%20Rental&am=' + bookingAmount + '&cu=INR&tn=Booking-' + bookingIdStr;
+        var upiUri = 'upi://pay?pa=9141814934@naviaxis&pn=CarBike%20Rental&am=' + bookingAmount + '&cu=INR&tn=Booking-' + bookingIdStr;
 
         // Render dynamic QR code
         function generateQr() {

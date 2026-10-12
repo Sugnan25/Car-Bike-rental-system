@@ -261,7 +261,7 @@
         
         .search-filter-box {
             max-width: 1200px;
-            margin: 0 auto 35px;
+            margin: 0 auto 10px;
             background: linear-gradient(135deg, #161c30 0%, #121626 100%);
             border: 1px solid rgba(0, 210, 255, 0.25);
             border-radius: 16px;
